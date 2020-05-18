@@ -1,4 +1,8 @@
 #include "../include/Game.hpp"
+#include "../include/TextureManager.hpp"
+#include "../include/GameObject.hpp"
+
+GameObject* player;
 
 Game::Game()
 {
@@ -11,47 +15,57 @@ Game::~Game()
 }
 
 void Game::init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen)
-{
+{   
+    bool success = true;
+
     // "Create window in fullscreen or not" flag
-    int flags = fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN;
+    int windowFlags = fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN;
+    
+    // "Which image support initialize" flag
+    int imageFlags = IMG_INIT_PNG;
 
     // Initialize SDL
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
         printf("Failed to initialize SDL subsystems! SDL_Error: %s\n", SDL_GetError());
+        success = false;
+    }
+
+    // Initialize SDL_Image
+    if (!(IMG_Init(imageFlags) & imageFlags))
+    {
+        printf("Failed to initialize PNG support! IMG_Error: %s\n", IMG_GetError());
+        success = false;
+    }
+
+    // Creating window
+    window = SDL_CreateWindow(title, xpos, ypos, width, height, windowFlags);
+    if (window == NULL)
+    {
+        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+        success = false;
+    }
+
+    // Creating renderer
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    if (renderer == NULL)
+    {
+        printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+        success = false;
+    }
+    
+    // Run the game
+    if (!success)
+    {
+        isRunning = false;
     }
     else
     {
-        printf("SDL subsystems initialized!...\n");
+        isRunning = true;
 
-        // Creating window
-        window = SDL_CreateWindow(title, xpos, ypos, width, height, flags);
-        if (window == NULL)
-        {
-            printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-        }
-        else
-        {
-            printf("Window created!...\n");
-
-            // Creating renderer
-            renderer = SDL_CreateRenderer(window, -1, 0);
-            if (renderer == NULL)
-            {
-                printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
-            }
-            else
-            {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-                printf("Renderer created!...\n");
-
-                printf("Game is running!...\n");
-
-                isRunning = true;
-            }
-        }
-
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        
+        player = new GameObject("assets/skyship.png", renderer, 0, 0);
     }
 }
 
@@ -77,13 +91,15 @@ void Game::handleEvents()
 
 void Game::update()
 {
-
+    player->Update();
 }
 
 void Game::render()
 {
     SDL_RenderClear(renderer);
-    // TODO render
+
+    player->Render();
+
     SDL_RenderPresent(renderer);
 }
 
@@ -99,6 +115,4 @@ void Game::clean()
 
     // Quit SDL subsystems
     SDL_Quit();
-
-    printf("Game cleaned!\n");
 }

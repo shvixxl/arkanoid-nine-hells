@@ -1,5 +1,5 @@
 # Define the project name
-project(ArkanoidBaator)
+project(ArkanoidNineHells)
 
 # Set the cmake minimum version to 3.17
 cmake_minimum_required(VERSION 3.17)
@@ -45,3 +45,4 @@ target_link_libraries(${PROJECT_NAME} SDL2::Image)
 # Add SDL2_gfx library
 #find_package(SDL2_gfx REQUIRED)
 #target_link_libraries(${PROJECT_NAME} SDL2::GFX)
+

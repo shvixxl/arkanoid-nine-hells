@@ -1,26 +1,30 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_image.h>
 #include <stdio.h>
 
-class Game {
+class Game
+{
+    public:
+        Game();
+        ~Game();
 
-public:
-    Game();
-    ~Game();
+        void init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen);
 
-    void init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen);
+        void handleEvents();
+        void update();
+        void render();
+        void clean();
 
-    void handleEvents();
-    void update();
-    void render();
-    void clean();
+        bool running() { return isRunning; }
 
-    bool running() { return isRunning; }
+    private:
+        bool isRunning = false;
 
-private:
-    bool isRunning = false;
+        int count = 0;
 
-    SDL_Window* window = NULL;
-    SDL_Renderer* renderer = NULL;
+        SDL_Window* window = NULL;
+        SDL_Renderer* renderer = NULL;
 
 
 };

@@ -1,6 +1,9 @@
 # Project executables
 ArkanoidBaator
 
+# IDE files
+.undodir
+
 # Prerequisites
 *.d
 
