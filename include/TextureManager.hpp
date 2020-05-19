@@ -1,11 +1,12 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_image.h>
-#include <stdio.h>
+#ifndef GAME
+#define GAME
+#include "Game.hpp"
+#endif
 
 class TextureManager
 {
     public:
-        static SDL_Texture* LoadTexture(const char* filename, SDL_Renderer* renderer);
+        static SDL_Texture* LoadTexture(const char* filename);
+        static void RenderTexture(SDL_Texture* texture, SDL_Rect* textureRect, SDL_Rect* windowRect);
 };
 

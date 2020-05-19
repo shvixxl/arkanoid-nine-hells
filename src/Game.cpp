@@ -1,8 +1,11 @@
 #include "../include/Game.hpp"
 #include "../include/TextureManager.hpp"
 #include "../include/GameObject.hpp"
+#include "../include/Map.hpp"
 
 GameObject* player;
+Map* map;
+SDL_Renderer* Game::renderer = NULL;
 
 Game::Game()
 {
@@ -15,8 +18,11 @@ Game::~Game()
 }
 
 void Game::init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen)
-{   
+{
     bool success = true;
+    
+    // Initialize random
+    srand(time(NULL));
 
     // "Create window in fullscreen or not" flag
     int windowFlags = fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN;
@@ -53,7 +59,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
         success = false;
     }
-    
+
     // Run the game
     if (!success)
     {
@@ -64,8 +70,9 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         isRunning = true;
 
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        
-        player = new GameObject("assets/skyship.png", renderer, 0, 0);
+
+        player = new GameObject("assets/skyship.png", 0, 0);
+        map = new Map("assets/first.png", "assets/brick.png", "assets/crack.png", 25, 8);
     }
 }
 
@@ -92,11 +99,15 @@ void Game::handleEvents()
 void Game::update()
 {
     player->Update();
+
+    map->Update();
 }
 
 void Game::render()
 {
     SDL_RenderClear(renderer);
+
+    map->Render();
 
     player->Render();
 
@@ -105,14 +116,13 @@ void Game::render()
 
 void Game::clean()
 {
-    // Destroy window
-    SDL_DestroyWindow(window);
-    window = NULL;
-
-    // Destroy renderer
     SDL_DestroyRenderer(renderer);
     renderer = NULL;
 
-    // Quit SDL subsystems
+    SDL_DestroyWindow(window);
+    window = NULL;
+
+    IMG_Quit();
+
     SDL_Quit();
 }

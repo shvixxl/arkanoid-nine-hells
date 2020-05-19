@@ -1,7 +1,12 @@
+#define GAME
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <vector>
 
 class Game
 {
@@ -18,13 +23,10 @@ class Game
 
         bool running() { return isRunning; }
 
+        static SDL_Renderer* renderer;
+
     private:
         bool isRunning = false;
 
-        int count = 0;
-
         SDL_Window* window = NULL;
-        SDL_Renderer* renderer = NULL;
-
-
 };

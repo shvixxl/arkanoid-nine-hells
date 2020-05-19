@@ -1,12 +1,12 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_image.h>
-#include <stdio.h>
+#ifndef GAME
+#define GAME
+#include "Game.hpp"
+#endif
 
 class GameObject
 {
     public:
-        GameObject(const char* texture, SDL_Renderer* renderer, int x, int y);
+        GameObject(const char* texture, int x, int y);
         ~GameObject();
         
         void Update();
@@ -16,9 +16,8 @@ class GameObject
         int x;
         int y;
 
-        SDL_Texture* texture;
+        SDL_Texture* texture = NULL;
         SDL_Rect srcRect, destRect;
-        SDL_Renderer* renderer;
 
 };
 
