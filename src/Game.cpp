@@ -1,26 +1,20 @@
 #include "../include/Game.hpp"
-#include "../include/TextureManager.hpp"
-#include "../include/Player.hpp"
+#include "../include/Window.hpp"
 #include "../include/Map.hpp"
+#include "../include/Player.hpp"
+#include "../include/Ball.hpp"
 
-GameObject* player;
-Map* map;
-SDL_Renderer* Game::renderer = NULL;
+Map* map = nullptr;
+Player* player = nullptr;
+Ball* ball = nullptr;
 
-Game::Game()
-{
+SDL_Window* Window::window = nullptr;
+SDL_Renderer* Window::renderer = nullptr;
 
-}
-
-Game::~Game()
-{
-
-}
-
-void Game::init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen)
+void Game::init(const char* title, int x, int y, int width, int height, bool fullscreen)
 {
     bool success = true;
-    
+
     // Initialize random
     srand(time(NULL));
 
@@ -44,24 +38,11 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         success = false;
     }
 
-    // Creating window
-    window = SDL_CreateWindow(title, xpos, ypos, width, height, windowFlags);
-    if (window == NULL)
-    {
-        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-        success = false;
-    }
-
-    // Creating renderer
-    renderer = SDL_CreateRenderer(window, -1, 0);
-    if (renderer == NULL)
-    {
-        printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
-        success = false;
-    }
+    // Initializing window and renderer
+    Window::Init(title, x, y, width, height, windowFlags);
 
     // Run the game
-    if (!success)
+    if (!success && !Window::isExist())
     {
         isRunning = false;
     }
@@ -69,10 +50,9 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     {
         isRunning = true;
 
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-        player = new GameObject("assets/skyship.png", 0, 0);
         map = new Map("assets/Avernus.png", "assets/brick.png", "assets/crack.png", 25, 8);
+        player = new Player("assets/skyship.png");
+        ball = new Ball("assets/ball.png");
     }
 }
 
@@ -92,6 +72,7 @@ void Game::handleEvents()
             break;
 
         default:
+            player->HandleEvents(&event);
             break;
     }
 }
@@ -100,27 +81,36 @@ void Game::update()
 {
     player->Update();
 
+    ball->Update();
+
     map->Update();
 }
 
 void Game::render()
 {
-    SDL_RenderClear(renderer);
+    Window::RednerClear();
 
     map->Render();
 
     player->Render();
 
-    SDL_RenderPresent(renderer);
+    ball->Render();
+
+    Window::RenderPresent();
 }
 
 void Game::clean()
 {
-    SDL_DestroyRenderer(renderer);
-    renderer = NULL;
+    delete ball;
+    ball = nullptr;
+    
+    delete player;
+    player = nullptr;
 
-    SDL_DestroyWindow(window);
-    window = NULL;
+    delete map;
+    map = nullptr;
+
+    Window::Clean();
 
     IMG_Quit();
 

@@ -1,11 +1,12 @@
 #include "../include/Map.hpp"
-#include "../include/TextureManager.hpp"
+#include "../include/Window.hpp"
+#include <SDL2/SDL_render.h>
 
 Map::Map(const char* backgroundTexture, const char* brickTexture, const char* crackTexture, int h, int w)
 {
-    this->backgroundTexture = TextureManager::LoadTexture(backgroundTexture);
-    this->brickTexture = TextureManager::LoadTexture(brickTexture);
-    this->crackTexture = TextureManager::LoadTexture(crackTexture);
+    this->backgroundTexture = Window::LoadTexture(backgroundTexture);
+    this->brickTexture = Window::LoadTexture(brickTexture);
+    this->crackTexture = Window::LoadTexture(crackTexture);
     
     background = new Background();
 
@@ -16,11 +17,19 @@ Map::Map(const char* backgroundTexture, const char* brickTexture, const char* cr
     {
         map[i] = new int[mapWidth];
     }
-    
+
     Generate();
     Next();
 }
 
+Map::~Map()
+{
+    bricks.clear();
+
+    SDL_DestroyTexture(backgroundTexture);
+    SDL_DestroyTexture(crackTexture);
+    SDL_DestroyTexture(crackTexture);
+}
 
 // MAP GENERATION
 void Map::Generate()
@@ -89,6 +98,10 @@ void Map::Render()
 }
 
 
+
+
+
+
 Brick::Brick(int x, int y)
 {
     int type = rand() % 64;
@@ -115,9 +128,11 @@ Brick::~Brick()
 
 void Brick::Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture)
 {
-    SDL_RenderCopy(Game::renderer, brickTexture, &brickRect, &windowRect);
-    SDL_RenderCopy(Game::renderer, crackTexture, &crackRect, &windowRect);
+    Window::Render(brickTexture, &brickRect, &windowRect);
+    Window::Render(crackTexture, &crackRect, &windowRect);
 }
+
+
 
 
 
@@ -137,11 +152,11 @@ Background::Background()
 
 void Background::Render(SDL_Texture* texture)
 {
-    SDL_RenderCopy(Game::renderer, texture, &textureRect, &windowRect);
+    Window::Render(texture, &textureRect, &windowRect);
 }
 
 void Background::Update()
 {
-    textureRect.x = textureRect.w * ((SDL_GetTicks() / 100) % 5);
+    textureRect.x = textureRect.w * ((SDL_GetTicks() / frameDelay) % 5);
 }
 

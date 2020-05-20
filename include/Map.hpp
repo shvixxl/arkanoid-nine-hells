@@ -33,6 +33,8 @@ class Background
         void Update();
 
     private:
+        int frameDelay = 100;
+
         SDL_Rect textureRect;
         SDL_Rect windowRect;
 };
