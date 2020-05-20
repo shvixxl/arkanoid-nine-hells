@@ -7,7 +7,7 @@ class Brick
 {
     public:
         Brick(int x, int y);
-        //~Brick();
+        ~Brick();
 
         bool Hit();
         void Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture);
@@ -30,6 +30,7 @@ class Background
         ~Background();
 
         void Render(SDL_Texture* texture);
+        void Update();
 
     private:
         SDL_Rect textureRect;

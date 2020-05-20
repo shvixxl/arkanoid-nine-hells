@@ -1,4 +1,4 @@
-#include "../include/GameObject.hpp"
+#include "../include/Player.hpp"
 #include "../include/TextureManager.hpp"
 
 GameObject::GameObject(const char* filename, int x, int y)
@@ -15,7 +15,7 @@ void GameObject::Update()
     y++;
 
     srcRect.h = 32;
-    srcRect.w = 32;
+    srcRect.w = 42;
     srcRect.x = 0;
     srcRect.y = 0;
 

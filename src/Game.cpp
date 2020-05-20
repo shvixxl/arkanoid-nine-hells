@@ -1,6 +1,6 @@
 #include "../include/Game.hpp"
 #include "../include/TextureManager.hpp"
-#include "../include/GameObject.hpp"
+#include "../include/Player.hpp"
 #include "../include/Map.hpp"
 
 GameObject* player;
@@ -72,7 +72,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
         player = new GameObject("assets/skyship.png", 0, 0);
-        map = new Map("assets/first.png", "assets/brick.png", "assets/crack.png", 25, 8);
+        map = new Map("assets/Avernus.png", "assets/brick.png", "assets/crack.png", 25, 8);
     }
 }
 

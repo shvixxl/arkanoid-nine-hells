@@ -4,9 +4,6 @@ ArkanoidBaator
 # IDE files
 .undodir
 
-# Krita backup files
-*~
-
 # Prerequisites
 *.d
 
