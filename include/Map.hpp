@@ -1,7 +1,9 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
+#include "Ball.hpp"
 #endif
+
 
 class Brick
 {
@@ -11,9 +13,9 @@ class Brick
 
         bool Hit();
         void Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture);
-
+        
+        SDL_Rect getRect() { return windowRect; }
     private:
-        int healthMax;
         int health;
 
         SDL_Rect brickRect;
@@ -48,7 +50,7 @@ class Map
 
         void Generate();
         void Next();
-        void Update();
+        void Update(Ball* ball);
         void Render();
 
     private:

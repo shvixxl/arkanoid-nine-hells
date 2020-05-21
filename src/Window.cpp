@@ -1,5 +1,6 @@
 #include "../include/Window.hpp"
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_video.h>
 
 void Window::Init(const char* title, int x, int y, int w, int h, int windowFlags)
 {
@@ -56,5 +57,23 @@ void Window::RednerClear()
 void Window::RenderPresent()
 {
     SDL_RenderPresent(renderer);
+}
+
+int Window::getWidth()
+{
+    int w;
+
+    SDL_GetWindowSize(window, &w, NULL);
+
+    return w;
+}
+
+int Window::getHeight()
+{
+    int h;
+
+    SDL_GetWindowSize(window, NULL, &h);
+
+    return h;
 }
 

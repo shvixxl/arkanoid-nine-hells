@@ -1,15 +1,20 @@
 #include "../include/Game.hpp"
 #include "../include/Window.hpp"
+#include "../include/Ball.hpp"
 #include "../include/Map.hpp"
 #include "../include/Player.hpp"
-#include "../include/Ball.hpp"
 
+// SDL objects
+SDL_Window* Window::window = nullptr;
+SDL_Renderer* Window::renderer = nullptr;
+
+// Game objects
 Map* map = nullptr;
 Player* player = nullptr;
 Ball* ball = nullptr;
 
-SDL_Window* Window::window = nullptr;
-SDL_Renderer* Window::renderer = nullptr;
+// Static variables
+bool Game::isStarted = false;
 
 void Game::init(const char* title, int x, int y, int width, int height, bool fullscreen)
 {
@@ -52,8 +57,27 @@ void Game::init(const char* title, int x, int y, int width, int height, bool ful
 
         map = new Map("assets/Avernus.png", "assets/brick.png", "assets/crack.png", 25, 8);
         player = new Player("assets/skyship.png");
-        ball = new Ball("assets/ball.png");
     }
+}
+
+void Game::start()
+{
+    SDL_Rect tempRect = player->getRect();
+
+    int x = tempRect.x + tempRect.w / 2 - 16;
+    int y = tempRect.y + tempRect.h;
+
+    ball = new Ball("assets/ball.png", x, y, player->getSpeed());
+
+    isStarted = true;
+}
+
+void Game::stop()
+{
+    delete ball;
+    ball = nullptr;
+
+    isStarted = false;
 }
 
 void Game::handleEvents()
@@ -81,9 +105,12 @@ void Game::update()
 {
     player->Update();
 
-    ball->Update();
+    if (Game::started())
+    {
+        ball->Update(player->getSpeed(), player->getRect());
+    }
 
-    map->Update();
+    map->Update(ball);
 }
 
 void Game::render()
@@ -94,16 +121,16 @@ void Game::render()
 
     player->Render();
 
-    ball->Render();
+    if (Game::started())
+    {
+        ball->Render();
+    }
 
     Window::RenderPresent();
 }
 
 void Game::clean()
 {
-    delete ball;
-    ball = nullptr;
-    
     delete player;
     player = nullptr;
 

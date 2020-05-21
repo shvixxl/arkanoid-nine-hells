@@ -15,6 +15,8 @@ class Window
         static void RednerClear();
         static void RenderPresent();
 
+        static void CheckCollision();
+
         static int getWidth();
         static int getHeight();
 

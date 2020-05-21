@@ -1,5 +1,6 @@
 #include "../include/Map.hpp"
 #include "../include/Window.hpp"
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 
 Map::Map(const char* backgroundTexture, const char* brickTexture, const char* crackTexture, int h, int w)
@@ -82,9 +83,27 @@ void Map::Next()
     }
 }
 
-void Map::Update()
+void Map::Update(Ball* ball)
 {
     background->Update();
+
+    if (Game::started())
+    {
+        for (auto it = bricks.begin(); it != bricks.end(); ++it)
+        {
+            SDL_Rect brickRect = it->getRect();
+            SDL_Rect ballRect = ball->getRect();
+
+            if (SDL_HasIntersection(&brickRect, &ballRect))
+            {
+                ball->Rebound(&brickRect, 0, 0);
+                if (it->Hit())
+                {
+                    it = bricks.erase(it);
+                }
+            }
+        }
+    }
 }
 
 void Map::Render()
@@ -119,11 +138,24 @@ Brick::Brick(int x, int y)
     windowRect.y = y;
     windowRect.h = brickRect.h * 2;
     windowRect.w = brickRect.w * 2;
+
+    health = 7;
 }
 
 Brick::~Brick()
 {
 
+}
+
+bool Brick::Hit()
+{
+    int damage = rand() % 4 + 1;
+
+    health -= damage;
+    crackRect.x += crackRect.w * damage;
+    
+    // Return true if this brick is broken (health <= 0)
+    return !(health > 0);
 }
 
 void Brick::Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture)
