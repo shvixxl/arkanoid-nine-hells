@@ -28,7 +28,8 @@ class Ball
         float speedY;
         float speedX;
 
-        int frameDelay = 100;
+        int frames;
+        int frameDelay;
 
         SDL_Texture* texture = nullptr;
 

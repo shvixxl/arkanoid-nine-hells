@@ -19,10 +19,17 @@ class Window
 
         static int getWidth();
         static int getHeight();
+        
+        static float getMultiplierW() { return multiplierW; }
+        static float getMultiplierH() { return multiplierH; }
 
         static bool isExist() { return window && renderer; }
 
+    private:
         static SDL_Window* window;
         static SDL_Renderer* renderer;
+        
+        static float multiplierW;
+        static float multiplierH;
 };
 

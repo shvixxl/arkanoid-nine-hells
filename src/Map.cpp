@@ -3,11 +3,12 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 
-Map::Map(const char* backgroundTexture, const char* brickTexture, const char* crackTexture, int h, int w)
+Map::Map(const char* backgroundTexture, const char* brickTexture, const char* crackTexture, const char* powerTexture, int h, int w)
 {
     this->backgroundTexture = Window::LoadTexture(backgroundTexture);
     this->brickTexture = Window::LoadTexture(brickTexture);
     this->crackTexture = Window::LoadTexture(crackTexture);
+    this->powerTexture = Window::LoadTexture(powerTexture);
     
     background = new Background();
 
@@ -28,8 +29,9 @@ Map::~Map()
     bricks.clear();
 
     SDL_DestroyTexture(backgroundTexture);
+    SDL_DestroyTexture(brickTexture);
     SDL_DestroyTexture(crackTexture);
-    SDL_DestroyTexture(crackTexture);
+    SDL_DestroyTexture(powerTexture);
 }
 
 // MAP GENERATION
@@ -89,10 +91,22 @@ void Map::Update(Ball* ball)
 
     if (Game::started())
     {
+        SDL_Rect ballRect = ball->getRect();
+
+        for (auto it = powers.begin(); it != powers.end(); ++it)
+        {
+            SDL_Rect powerRect = it->getRect();
+
+            if (SDL_HasIntersection(&powerRect, &ballRect))
+            {
+                it = powers.erase(it);
+                printf("Hmm");
+            }
+        }
+
         for (auto it = bricks.begin(); it != bricks.end(); ++it)
         {
             SDL_Rect brickRect = it->getRect();
-            SDL_Rect ballRect = ball->getRect();
 
             if (SDL_HasIntersection(&brickRect, &ballRect))
             {
@@ -100,6 +114,7 @@ void Map::Update(Ball* ball)
                 if (it->Hit())
                 {
                     it = bricks.erase(it);
+                    powers.push_back(Power(&brickRect));
                 }
             }
         }
@@ -113,6 +128,11 @@ void Map::Render()
     for (auto it = bricks.begin(); it != bricks.end(); ++it)
     {
         it->Render(brickTexture, crackTexture);
+    }
+
+    for (auto it = powers.begin(); it != powers.end(); ++it)
+    {
+        it->Render(powerTexture);
     }
 }
 
@@ -136,8 +156,8 @@ Brick::Brick(int x, int y)
 
     windowRect.x = x;
     windowRect.y = y;
-    windowRect.h = brickRect.h * 2;
-    windowRect.w = brickRect.w * 2;
+    windowRect.h = brickRect.h * Window::getMultiplierH();
+    windowRect.w = brickRect.w * Window::getMultiplierW();
 
     health = 7;
 }
@@ -175,11 +195,14 @@ Background::Background()
     textureRect.y = 0;
     textureRect.h = 384;
     textureRect.w = 256;
+
+    frames = 5;
+    frameDelay = 100;
     
     windowRect.x = 0;
     windowRect.y = 0;
-    windowRect.h = 768;
-    windowRect.w = 512;
+    windowRect.h = textureRect.h * Window::getMultiplierH();
+    windowRect.w = textureRect.w * Window::getMultiplierW();
 }
 
 void Background::Render(SDL_Texture* texture)
@@ -189,6 +212,6 @@ void Background::Render(SDL_Texture* texture)
 
 void Background::Update()
 {
-    textureRect.x = textureRect.w * ((SDL_GetTicks() / frameDelay) % 5);
+    textureRect.x = textureRect.w * ((SDL_GetTicks() / frameDelay) % frames);
 }
 

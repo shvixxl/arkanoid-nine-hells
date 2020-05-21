@@ -13,8 +13,11 @@ Ball::Ball(const char* filename, int x, int y, float paddleSpeed)
     textureRect.x = 0;
     textureRect.y = 0;
 
-    windowRect.h = textureRect.h * 2;
-    windowRect.w = textureRect.w * 2;
+    frames = 5;
+    frameDelay = 100;
+
+    windowRect.h = textureRect.h * Window::getMultiplierH();
+    windowRect.w = textureRect.w * Window::getMultiplierW();
     windowRect.x = x;
     windowRect.y = y;
 
@@ -35,7 +38,7 @@ void Ball::Update(float paddleSpeed, SDL_Rect paddleRect)
     // Movement
     x += speedX;
     y += speedY;
-    
+
     // Paddle collison
     //
     // If the ball collided with the paddle
@@ -83,7 +86,7 @@ void Ball::Update(float paddleSpeed, SDL_Rect paddleRect)
     windowRect.y = y;
 
     // Animation
-    textureRect.x = ((SDL_GetTicks() / frameDelay) % 5) * textureRect.h;
+    textureRect.x = ((SDL_GetTicks() / frameDelay) % frames) * textureRect.w;
 }
 
 void Ball::Render()

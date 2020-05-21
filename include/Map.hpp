@@ -2,8 +2,8 @@
 #define GAME
 #include "Game.hpp"
 #include "Ball.hpp"
+#include "Power.hpp"
 #endif
-
 
 class Brick
 {
@@ -35,7 +35,8 @@ class Background
         void Update();
 
     private:
-        int frameDelay = 100;
+        int frames;
+        int frameDelay;
 
         SDL_Rect textureRect;
         SDL_Rect windowRect;
@@ -45,7 +46,7 @@ class Background
 class Map
 {
     public:
-        Map(const char* background, const char* brickTexture, const char* crackTexture, int h, int w);
+        Map(const char* background, const char* brickTexture, const char* crackTexture, const char* powerTexture, int h, int w);
         ~Map();
 
         void Generate();
@@ -64,8 +65,10 @@ class Map
         SDL_Texture* brickTexture;
         SDL_Texture* crackTexture;
         SDL_Texture* backgroundTexture;
+        SDL_Texture* powerTexture;
 
         std::vector<Brick> bricks;
+        std::vector<Power> powers;
         Background* background = NULL;
 };
 

@@ -2,6 +2,12 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 
+SDL_Window* Window::window = nullptr;
+SDL_Renderer* Window::renderer = nullptr;
+
+float Window::multiplierW = 1;
+float Window::multiplierH = 1;
+
 void Window::Init(const char* title, int x, int y, int w, int h, int windowFlags)
 {
     window = SDL_CreateWindow(title, x, y, w, h, windowFlags);
@@ -20,6 +26,8 @@ void Window::Init(const char* title, int x, int y, int w, int h, int windowFlags
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     }
 
+    multiplierW = w / 256;
+    multiplierH = h / 384;
 }
 
 void Window::Clean()

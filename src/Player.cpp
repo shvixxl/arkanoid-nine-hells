@@ -16,9 +16,9 @@ Player::Player(const char* filename)
     textureRect.x = 0;
     textureRect.y = 0;
 
-    windowRect.h = textureRect.h * 2;
-    windowRect.w = textureRect.w * 2;
-    windowRect.x = 512 / 2 - windowRect.w / 2;
+    windowRect.h = textureRect.h * Window::getMultiplierH();
+    windowRect.w = textureRect.w * Window::getMultiplierW();
+    windowRect.x = Window::getWidth() / 2 - windowRect.w / 2;
     windowRect.y = 5;
 
     x = windowRect.x;

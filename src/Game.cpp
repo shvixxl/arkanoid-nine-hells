@@ -1,12 +1,9 @@
 #include "../include/Game.hpp"
 #include "../include/Window.hpp"
 #include "../include/Ball.hpp"
+#include "../include/Power.hpp"
 #include "../include/Map.hpp"
 #include "../include/Player.hpp"
-
-// SDL objects
-SDL_Window* Window::window = nullptr;
-SDL_Renderer* Window::renderer = nullptr;
 
 // Game objects
 Map* map = nullptr;
@@ -55,7 +52,7 @@ void Game::init(const char* title, int x, int y, int width, int height, bool ful
     {
         isRunning = true;
 
-        map = new Map("assets/Avernus.png", "assets/brick.png", "assets/crack.png", 25, 8);
+        map = new Map("assets/Avernus.png", "assets/brick.png", "assets/crack.png", "assets/bonus.png",25, 8);
         player = new Player("assets/skyship.png");
     }
 }
