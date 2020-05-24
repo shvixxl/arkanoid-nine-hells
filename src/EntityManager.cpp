@@ -1,12 +1,15 @@
 #include "../include/EntityManager.hpp"
 #include "../include/Window.hpp"
+#include <cstddef>
 
 std::vector<Sphere> EntityManager::spheres;
-std::vector<Ship> EntityManager::ships;
+Ship* EntityManager::ship = nullptr;
 
 void EntityManager::Clean()
 {
-    ships.clear();
+    delete ship;
+    ship = nullptr;
+
     spheres.clear();
 }
 
@@ -15,48 +18,42 @@ void EntityManager::Clean()
 
 void EntityManager::addShip(Ships type)
 {
-    ships.push_back(Ship(type));
+    ship = new Ship(type);
 }
 
 
-void EntityManager::UpdateShips()
+void EntityManager::UpdateShip()
 {
-    for (size_t i = 0; i < ships.size(); ++i)
+    ship->Update();
+
+    SDL_Rect shipRect = ship->getRect();
+
+    std::vector<size_t> collided_spheres = EntityManager::SpheresCheckCollision(&shipRect);
+    for (size_t k = 0; k < collided_spheres.size(); ++k)
     {
-        ships.at(i).Update();
-
-        SDL_Rect shipRect = ships.at(i).getRect();
-
-        std::vector<size_t> collided_spheres = EntityManager::SpheresCheckCollision(&shipRect);
-        for (size_t k = 0; k < collided_spheres.size(); ++k)
-        {
-            EntityManager::SpheresRebound(k, &shipRect, ships.at(i).getSpeed(), 0);
-        }
+        EntityManager::SpheresRebound(collided_spheres.at(k), &shipRect, ship->getSpeed(), 0);
     }
 }
 
 
-void EntityManager::RenderShips()
+void EntityManager::RenderShip()
 {
-    for (size_t i = 0; i < ships.size(); ++i)
-    {
-        ships.at(i).Render();
-    }
+        ship->Render();
 }
 
-void EntityManager::ShipsHandleEvents(SDL_Event* event)
+void EntityManager::ShipHandleEvents(SDL_Event* event)
 {
-    if (!ships.empty())
+    if (ship)
     {
         if (event->type == SDL_KEYDOWN && event->key.repeat == 0)
         {
             switch (event->key.keysym.sym)
             {
                 case SDLK_LEFT:
-                    ships.at(0).Move(+MOVE_LEFT);
+                    ship->Move(+MOVE_LEFT);
                     break;
                 case SDLK_RIGHT:
-                    ships.at(0).Move(+MOVE_RIGHT);
+                    ship->Move(+MOVE_RIGHT);
                     break;
                 default:
                     break;
@@ -68,13 +65,13 @@ void EntityManager::ShipsHandleEvents(SDL_Event* event)
             switch (event->key.keysym.sym)
             {
                 case SDLK_LEFT:
-                    ships.at(0).Move(-MOVE_LEFT);
+                    ship->Move(-MOVE_LEFT);
                     break;
                 case SDLK_RIGHT:
-                    ships.at(0).Move(-MOVE_RIGHT);
+                    ship->Move(-MOVE_RIGHT);
                     break;
                 case SDLK_SPACE:
-                    EntityManager::addSphere(annihilation, ships.at(0).getRect().x / 2, ships.at(0).getRect().y + ships.at(0).getRect().w, ships.at(0).getSpeed());
+                    EntityManager::addSphere(annihilation, ship->getRect().x + ship->getRect().w / 2, ship->getRect().y + ship->getRect().w, ship->getSpeed(), 0);
                     break;
                 default:
                     break;
@@ -90,9 +87,9 @@ void EntityManager::ShipsHandleEvents(SDL_Event* event)
 
 // Functions for spheres
 
-void EntityManager::addSphere(Spheres type, int x, int y, float paddle_speed)
+void EntityManager::addSphere(Spheres type, int x, int y, float speedX, float speedY)
 {
-    spheres.push_back(Sphere(type, x, y, paddle_speed));
+    spheres.push_back(Sphere(type, x, y, speedX, speedY));
 }
 
 
@@ -107,9 +104,9 @@ void EntityManager::UpdateSpheres()
 
 void EntityManager::RenderSpheres()
 {
-    for (size_t i = 0; i < spheres.size(); ++i)
+    for (auto it = spheres.begin(); it != spheres.end(); ++it)
     {
-        spheres.at(i).Render();
+        it->Render();
     }
 }
 
@@ -131,6 +128,6 @@ std::vector<size_t> EntityManager::SpheresCheckCollision(SDL_Rect* objectRect)
 
 void EntityManager::SpheresRebound(size_t id, SDL_Rect* objectRect, float objectSpeedX, float objectSpeedY)
 {
-        spheres.at(id).Rebound(objectRect, objectSpeedX, objectSpeedY);
+    spheres.at(id).Rebound(objectRect, objectSpeedX, objectSpeedY);
 }
 

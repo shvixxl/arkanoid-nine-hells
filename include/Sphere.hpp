@@ -11,7 +11,7 @@ enum Spheres
 class Sphere
 {
     public:
-        Sphere(Spheres type, int x, int y, float paddleSpeed);
+        Sphere(Spheres type, int x, int y, float speedX, float speedY);
         ~Sphere();
 
         void Update();
@@ -37,7 +37,7 @@ class Sphere
         int frames;
         int frameDelay;
 
-        SDL_Texture* texture = nullptr;
+        SDL_Texture* texture;
 
         SDL_Rect textureRect;
         SDL_Rect windowRect;

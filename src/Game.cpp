@@ -44,8 +44,8 @@ void Game::init(const char* title, int x, int y, int width, int height, bool ful
     else
     {
         isRunning = true;
-        MapManager::Init("assets/Avernus.png", "assets/brick.png", "assets/crack.png", "assets/bonus.png", 50, 13);
-
+        MapManager::Init("assets/Avernus.png", "assets/brick.png", "assets/crack.png", "assets/bonus.png", 32, 8);
+        PowerManager::Init();
         EntityManager::addShip(skyship);
     }
 }
@@ -66,7 +66,7 @@ void Game::handleEvents()
             break;
 
         default:
-            EntityManager::ShipsHandleEvents(&event);
+            EntityManager::ShipHandleEvents(&event);
             break;
     }
 }
@@ -75,13 +75,15 @@ void Game::update()
 {
     EntityManager::UpdateSpheres();
     
-    EntityManager::UpdateShips();
+    EntityManager::UpdateShip();
 
     MapManager::UpdateBackground();
 
+    MapManager::UpdatePowers();
+    
     MapManager::UpdateBricks();
 
-    MapManager::UpdatePowers();
+    PowerManager::Update();
 }
 
 void Game::render()
@@ -90,9 +92,11 @@ void Game::render()
 
     MapManager::Render();
     
-    EntityManager::RenderShips();
+    EntityManager::RenderShip();
 
     EntityManager::RenderSpheres();
+
+    PowerManager::Render();
 
     Window::RenderPresent();
 }

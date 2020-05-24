@@ -58,7 +58,7 @@ void Ship::Update()
     {
         Slow();
     }
-    
+
     x += speed;
 
     // Change position

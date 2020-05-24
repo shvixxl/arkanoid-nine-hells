@@ -13,16 +13,15 @@ class EntityManager
         // Functions for ships
         static void addShip(Ships type);
 
-        static void UpdateShips();
-        static void RenderShips();
+        static void UpdateShip();
+        static void RenderShip();
         
-        static void ShipsHandleEvents(SDL_Event* event);
+        static void ShipHandleEvents(SDL_Event* event);
 
-        static void getNumberShips();
-       
 
         // Functions for spheres
-        static void addSphere(Spheres type, int x, int y, float paddle_speed);
+        static void throwSphere(Sphere type);
+        static void addSphere(Spheres type, int x, int y, float speedX, float speedY);
         
         static void UpdateSpheres();
         static void RenderSpheres();
@@ -34,6 +33,6 @@ class EntityManager
 
     private:
         static std::vector<Sphere> spheres;
-        static std::vector<Ship> ships;
+        static Ship* ship;
 };
 

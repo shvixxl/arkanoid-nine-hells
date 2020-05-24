@@ -1,7 +1,7 @@
 #include "../include/Sphere.hpp"
 #include "../include/Window.hpp"
 
-Sphere::Sphere(Spheres type, int x, int y, float paddleSpeed)
+Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
 {
     const char* filename;
     switch (type)
@@ -27,23 +27,23 @@ Sphere::Sphere(Spheres type, int x, int y, float paddleSpeed)
 
     windowRect.h = textureRect.h * Window::getMultiplierH();
     windowRect.w = textureRect.w * Window::getMultiplierW();
-    windowRect.x = x;
-    windowRect.y = y;
+    windowRect.x = x - windowRect.w / 2;
+    windowRect.y = y - windowRect.h / 2;
 
-    this->x = x;
-    this->y = y;
+    this->x = windowRect.x;
+    this->y = windowRect.y;
     this->r = windowRect.w / 2;
 
     maxSpeed = 15;
     reduceSpeed = 0.25;
 
-    speedY = maxSpeed;
-    speedX = paddleSpeed;
+    this->speedY = maxSpeed + speedY;
+    this->speedX = speedX;
 }
 
 Sphere::~Sphere()
 {
-    SDL_DestroyTexture(texture);
+    //SDL_DestroyTexture(texture);
 }
 
 void Sphere::Update()
@@ -155,6 +155,7 @@ bool Sphere::CheckCollision(SDL_Rect* objectRect)
 
 void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeedY)
 {
+
     float centerX = x + r;
     float centerY = y + r;
 

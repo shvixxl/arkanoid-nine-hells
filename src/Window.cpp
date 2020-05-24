@@ -24,8 +24,8 @@ void Window::Init(const char* title, int x, int y, int w, int h, int windowFlags
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     }
 
-    multiplierW = w / 416;
-    multiplierH = h / 416;
+    multiplierW = w / 256 - 1;
+    multiplierH = h / 256;
 }
 
 void Window::Clean()
@@ -52,7 +52,10 @@ SDL_Texture* Window::LoadTexture(const char* filename)
 
 void Window::Render(SDL_Texture* texture, SDL_Rect* textureRect, SDL_Rect* windowRect)
 {
-    SDL_RenderCopy(renderer, texture, textureRect, windowRect);
+    if (SDL_RenderCopy(renderer, texture, textureRect, windowRect) < 0)
+    {
+        //printf("Texture could not be rendered! SDL_Error: %s\n", SDL_GetError());
+    }
 }
 
 void Window::RednerClear()

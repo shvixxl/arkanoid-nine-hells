@@ -37,10 +37,10 @@ void MapManager::Init(const char* background_filename, const char* brick_filenam
         map[i] = new int[mapWidth];
     }
 
-    step = 10;
+    step = 8;
     current = 0;
 
-    Generate(3);
+    Generate(2);
     Next();
 }
 
@@ -60,14 +60,14 @@ void MapManager::Generate(int spire)
     int firstX, lastX;
 
     // Chance to make map wider on current Y
-    int growthChance = mapHeight / 5;
+    int growthStep = mapHeight / mapWidth;
     int growth = 0;
     
     // If map should have spire (spire != 0)
     if (spire)
     {
-        firstX = (mapWidth - (spire + 1) / 2) / 2;
-        lastX  = (mapWidth + (spire - 1) / 2) / 2;
+        firstX = (mapWidth - ((spire + 1) / 2)) / 2;
+        lastX  = (mapWidth + ((spire - 1) / 2)) / 2;
     }
 
     for (int y = 0; y < mapHeight; y++)
@@ -77,8 +77,9 @@ void MapManager::Generate(int spire)
             map[y][x] = 1;
         }
 
+        growth++;
 
-        if (rand() % growthChance + growth >= growthChance)
+        if (growth >= growthStep)
         {
             growth = 0;
 
@@ -89,8 +90,6 @@ void MapManager::Generate(int spire)
             if (lastX < mapWidth - 1)
                 lastX++;
             }
-
-        growth++;
     }
 }
 
@@ -135,7 +134,7 @@ void MapManager::UpdateBricks()
 
         for (size_t k = 0; k < collided_spheres.size(); ++k)
         {
-            EntityManager::SpheresRebound(k, &brickRect, 0, 0);
+            EntityManager::SpheresRebound(collided_spheres.at(k), &brickRect, 0, 0);
 
             if (bricks.at(i).Hit())
             {
@@ -240,8 +239,8 @@ Background::Background()
 {
     textureRect.x = 0;
     textureRect.y = 0;
-    textureRect.h = 416;
-    textureRect.w = 416;
+    textureRect.h = 256;
+    textureRect.w = 256;
 
     frames = 5;
     frameDelay = 100;
