@@ -3,30 +3,36 @@
 #include "Game.hpp"
 #endif
 
-#define MAX_SPEED 20
-#define SPEED_REDUCE 2
+enum Spheres
+{
+    annihilation
+};
 
-class Ball
+class Sphere
 {
     public:
-        Ball(const char* filename, int x, int y, float paddleSpeed);
-        ~Ball();
-        
-        void Update(float paddleSpeed, SDL_Rect paddleRect);
+        Sphere(Spheres type, int x, int y, float paddleSpeed);
+        ~Sphere();
+
+        void Update();
         void Render();
-        
+
+        bool CheckCollision(SDL_Rect* objectRect);
         void Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeedY);
 
         SDL_Rect getRect() { return windowRect; }
 
     private:
-        int r;
+        float r;
 
         float x;
         float y;
 
         float speedY;
         float speedX;
+
+        float maxSpeed;
+        float reduceSpeed;
 
         int frames;
         int frameDelay;

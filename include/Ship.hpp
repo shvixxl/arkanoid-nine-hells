@@ -6,16 +6,21 @@
 #define MOVE_LEFT 1
 #define MOVE_RIGHT 2
 
-class Player
+enum Ships
+{
+    skyship
+};
+
+class Ship
 {
     public:
-        Player(const char* filename);
-        ~Player();
+        Ship(Ships type);
+        ~Ship();
 
         void Update();
         void Render();
 
-        void HandleEvents(SDL_Event* event);
+        void Move(int MOVE);
 
         void Slow();
 

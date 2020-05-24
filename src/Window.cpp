@@ -1,6 +1,4 @@
 #include "../include/Window.hpp"
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_video.h>
 
 SDL_Window* Window::window = nullptr;
 SDL_Renderer* Window::renderer = nullptr;
@@ -26,8 +24,8 @@ void Window::Init(const char* title, int x, int y, int w, int h, int windowFlags
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     }
 
-    multiplierW = w / 256;
-    multiplierH = h / 384;
+    multiplierW = w / 416;
+    multiplierH = h / 416;
 }
 
 void Window::Clean()
@@ -43,7 +41,7 @@ SDL_Texture* Window::LoadTexture(const char* filename)
     image = IMG_Load(filename);
     if (!image)
     {
-        printf("Image %s could not be loaded! IMG_Error: %s", filename, IMG_GetError());
+        printf("Image %s could not be loaded! IMG_Error: %s\n", filename, IMG_GetError());
     }
 
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, image);

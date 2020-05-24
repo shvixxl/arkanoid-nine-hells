@@ -1,17 +1,10 @@
 #include "../include/Game.hpp"
 #include "../include/Window.hpp"
-#include "../include/Ball.hpp"
-#include "../include/Power.hpp"
-#include "../include/Map.hpp"
-#include "../include/Player.hpp"
-
-// Game objects
-Map* map = nullptr;
-Player* player = nullptr;
-Ball* ball = nullptr;
-
-// Static variables
-bool Game::isStarted = false;
+#include "../include/Sphere.hpp"
+#include "../include/PowerManager.hpp"
+#include "../include/MapManager.hpp"
+#include "../include/Ship.hpp"
+#include "../include/EntityManager.hpp"
 
 void Game::init(const char* title, int x, int y, int width, int height, bool fullscreen)
 {
@@ -22,7 +15,7 @@ void Game::init(const char* title, int x, int y, int width, int height, bool ful
 
     // "Create window in fullscreen or not" flag
     int windowFlags = fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN;
-    
+
     // "Which image support initialize" flag
     int imageFlags = IMG_INIT_PNG;
 
@@ -51,30 +44,10 @@ void Game::init(const char* title, int x, int y, int width, int height, bool ful
     else
     {
         isRunning = true;
+        MapManager::Init("assets/Avernus.png", "assets/brick.png", "assets/crack.png", "assets/bonus.png", 50, 13);
 
-        map = new Map("assets/Avernus.png", "assets/brick.png", "assets/crack.png", "assets/bonus.png",25, 8);
-        player = new Player("assets/skyship.png");
+        EntityManager::addShip(skyship);
     }
-}
-
-void Game::start()
-{
-    SDL_Rect tempRect = player->getRect();
-
-    int x = tempRect.x + tempRect.w / 2 - 16;
-    int y = tempRect.y + tempRect.h;
-
-    ball = new Ball("assets/ball.png", x, y, player->getSpeed());
-
-    isStarted = true;
-}
-
-void Game::stop()
-{
-    delete ball;
-    ball = nullptr;
-
-    isStarted = false;
 }
 
 void Game::handleEvents()
@@ -93,46 +66,42 @@ void Game::handleEvents()
             break;
 
         default:
-            player->HandleEvents(&event);
+            EntityManager::ShipsHandleEvents(&event);
             break;
     }
 }
 
 void Game::update()
 {
-    player->Update();
+    EntityManager::UpdateSpheres();
+    
+    EntityManager::UpdateShips();
 
-    if (Game::started())
-    {
-        ball->Update(player->getSpeed(), player->getRect());
-    }
+    MapManager::UpdateBackground();
 
-    map->Update(ball);
+    MapManager::UpdateBricks();
+
+    MapManager::UpdatePowers();
 }
 
 void Game::render()
 {
     Window::RednerClear();
 
-    map->Render();
+    MapManager::Render();
+    
+    EntityManager::RenderShips();
 
-    player->Render();
-
-    if (Game::started())
-    {
-        ball->Render();
-    }
+    EntityManager::RenderSpheres();
 
     Window::RenderPresent();
 }
 
 void Game::clean()
 {
-    delete player;
-    player = nullptr;
+    EntityManager::Clean();
 
-    delete map;
-    map = nullptr;
+    MapManager::Clean();
 
     Window::Clean();
 
