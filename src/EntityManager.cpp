@@ -71,7 +71,7 @@ void EntityManager::ShipHandleEvents(SDL_Event* event)
                     ship->Move(-MOVE_RIGHT);
                     break;
                 case SDLK_SPACE:
-                    EntityManager::addSphere(annihilation, ship->getRect().x + ship->getRect().w / 2, ship->getRect().y + ship->getRect().w, ship->getSpeed(), 0);
+                    EntityManager::addSphere(driftglobe, ship->getRect().x + ship->getRect().w / 2, ship->getRect().y + ship->getRect().w, ship->getSpeed(), 0);
                     break;
                 default:
                     break;

@@ -44,7 +44,7 @@ void Game::init(const char* title, int x, int y, int width, int height, bool ful
     else
     {
         isRunning = true;
-        MapManager::Init("assets/Avernus.png", "assets/brick.png", "assets/crack.png", "assets/bonus.png", 32, 8);
+        MapManager::Init(avernus, 80, 12);
         PowerManager::Init();
         EntityManager::addShip(skyship);
     }

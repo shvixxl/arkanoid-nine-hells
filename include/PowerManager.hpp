@@ -10,7 +10,7 @@ enum Spells
     displacement,
     haste,
     find_path,
-    LAST = find_path
+    SPELLS_COUNT = find_path+1
 };
 
 

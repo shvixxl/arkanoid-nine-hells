@@ -67,9 +67,9 @@ void Ship::Update()
         x = 1;
         speed = 0;
     }
-    else if (x + windowRect.w >= Window::getWidth())
+    else if (x + windowRect.w >= 192 * Window::getMultiplierW())
     {
-        x = Window::getWidth() - windowRect.w;
+        x = 192 * Window::getMultiplierW() - windowRect.w;
         speed = 0;
     }
 

@@ -7,6 +7,12 @@
 #include "EntityManager.hpp"
 #endif
 
+enum Maps
+{
+    avernus,
+    MAPS_COUNT = avernus+1
+};
+
 class Brick
 {
     public:
@@ -66,7 +72,7 @@ class Power
 class MapManager
 {
     public:
-        static void Init(const char* background, const char* brickTexture, const char* crackTexture, const char* powerTexture, int h, int w);
+        static void Init(Maps type, int h, int w);
 
         static void Clean();
 

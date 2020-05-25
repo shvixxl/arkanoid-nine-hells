@@ -20,7 +20,7 @@ void PowerManager::Init()
     dockTextureRect.x = 0;
     dockTextureRect.y = 0;
     dockTextureRect.w = 64;
-    dockTextureRect.h = 256;
+    dockTextureRect.h = 192;
 
     dockWindowRect.x = Window::getWidth() - dockTextureRect.w * Window::getMultiplierW();
     dockWindowRect.y = 0;
@@ -33,8 +33,8 @@ void PowerManager::Init()
     cellWaitTexture = Window::LoadTexture("assets/spell_cell_wait.png");
     spellsTexture = Window::LoadTexture("assets/spells.png");
 
-    spells = new Spell*[LAST + 1];
-    for (int spell = 0; spell <= LAST; ++spell)
+    spells = new Spell*[SPELLS_COUNT];
+    for (int spell = 0; spell < SPELLS_COUNT; ++spell)
     {
         spells[spell] = new Spell(spell);
     }
@@ -42,7 +42,7 @@ void PowerManager::Init()
 
 void PowerManager::Clean()
 {
-    for (int spell = 0; spell <= LAST; ++spell)
+    for (int spell = 0; spell < SPELLS_COUNT; ++spell)
     {
         delete spells[spell];
         spells[spell] = nullptr;
@@ -83,7 +83,7 @@ void PowerManager::addSpell(Spells spell, int n)
 
 void PowerManager::Update()
 {
-    for (int spell = 0; spell <= LAST; ++spell)
+    for (int spell = 0; spell < SPELLS_COUNT; ++spell)
     {
         spells[spell]->Update();
     }
@@ -93,7 +93,7 @@ void PowerManager::Render()
 {
     Window::Render(dockTexture, &dockTextureRect, &dockWindowRect);
 
-    for (int spell = 0; spell <= LAST; ++spell)
+    for (int spell = 0; spell < SPELLS_COUNT; ++spell)
     {
         if (spells[spell]->ready())
         {
@@ -122,8 +122,8 @@ Spell::Spell(int spell)
 
     cellWindowRect.h = cellTextureRect.h * Window::getMultiplierH();
     cellWindowRect.w = cellTextureRect.w * Window::getMultiplierW();
-    cellWindowRect.x = (256 + 17) * Window::getMultiplierW();
-    cellWindowRect.y = (17) * Window::getMultiplierH();
+    cellWindowRect.x = (192 + 17) * Window::getMultiplierW();
+    cellWindowRect.y = (17 + (9 + cellTextureRect.h) * spell) * Window::getMultiplierH();
 
     spellsWindowRect.h = spellsTextureRect.h * Window::getMultiplierH();
     spellsWindowRect.w = spellsTextureRect.w * Window::getMultiplierW();
@@ -159,7 +159,7 @@ void Spell::cast(int s)
 
 bool Spell::ready()
 {
-    return endTime - SDL_GetTicks() <= 0;
+    return SDL_GetTicks() > endTime;
 }
 
 void Spell::Update()

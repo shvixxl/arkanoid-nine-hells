@@ -20,12 +20,20 @@ std::vector<Brick> MapManager::bricks;
 std::vector<Power> MapManager::powers;
 
 
-void MapManager::Init(const char* background_filename, const char* brick_filename, const char* crack_filename, const char* power_filename, int h, int w)
+void MapManager::Init(Maps type, int h, int w)
 {
-    backgroundTexture = Window::LoadTexture(background_filename);
-    brickTexture = Window::LoadTexture(brick_filename);
-    crackTexture = Window::LoadTexture(crack_filename);
-    powerTexture = Window::LoadTexture(power_filename);
+    switch (type)
+    {
+        case avernus:
+            backgroundTexture = Window::LoadTexture("assets/avernus.png");
+            brickTexture = Window::LoadTexture("assets/avernus_bricks.png");
+            crackTexture = Window::LoadTexture("assets/crack.png");
+            powerTexture = Window::LoadTexture("assets/soul.png");
+            break;
+        default:
+            return;
+            break;
+    }
 
     background = new Background();
 
@@ -37,7 +45,7 @@ void MapManager::Init(const char* background_filename, const char* brick_filenam
         map[i] = new int[mapWidth];
     }
 
-    step = 8;
+    step = 16;
     current = 0;
 
     Generate(2);
@@ -188,12 +196,12 @@ void MapManager::Render()
 
 Brick::Brick(int x, int y, int h)
 {
-    int type = rand() % 64;
+    int type = rand() % 9;
 
-    brickRect.h = 16;
-    brickRect.w = 32;
-    brickRect.x = (type / 8) * brickRect.w;
-    brickRect.y = (type % 8) * brickRect.h;
+    brickRect.h = 8;
+    brickRect.w = 16;
+    brickRect.x = (type / 3) * brickRect.w;
+    brickRect.y = (type % 3) * brickRect.h;
 
     crackRect.x = 0;
     crackRect.y = 0;
@@ -205,7 +213,7 @@ Brick::Brick(int x, int y, int h)
     windowRect.h = brickRect.h * Window::getMultiplierH();
     windowRect.w = brickRect.w * Window::getMultiplierW();
 
-    health = 7;
+    health = 5;
 }
 
 Brick::~Brick()
@@ -239,10 +247,10 @@ Background::Background()
 {
     textureRect.x = 0;
     textureRect.y = 0;
-    textureRect.h = 256;
-    textureRect.w = 256;
+    textureRect.h = 192;
+    textureRect.w = 192;
 
-    frames = 5;
+    frames = 1;
     frameDelay = 100;
 
     windowRect.x = 0;
@@ -275,10 +283,10 @@ Power::Power(SDL_Rect* objectRect)
 {
     textureRect.x = 0;
     textureRect.y = 0;
-    textureRect.w = 16;
-    textureRect.h = 16;
+    textureRect.w = 12;
+    textureRect.h = 8;
 
-    frames = 6;
+    frames = 4;
     frameDelay = 100;
 
     windowRect.w = textureRect.w * Window::getMultiplierW();

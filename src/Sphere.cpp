@@ -10,6 +10,10 @@ Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
             filename = "assets/SphereA.png";
             break;
 
+        case driftglobe:
+            filename = "assets/driftglobe.png";
+            break;
+
         default:
             filename = "assets/SphereA.png";
             break;
@@ -78,9 +82,9 @@ void Sphere::Update()
     // About [+ 1] in speedX formula... Idk why but this necessary to get
     // the same result as on the other side
     //
-    if (Window::getWidth() - windowRect.w - x <= windowRect.w)
+    if (192 * Window::getMultiplierW() - windowRect.w - x <= windowRect.w)
     {
-        speedX -= reduceSpeed * ((windowRect.w) - ((Window::getWidth() - x - windowRect.w) + 1));
+        speedX -= reduceSpeed * ((windowRect.w) - ((192 * Window::getMultiplierW() - x - windowRect.w) + 1));
     }
 
 

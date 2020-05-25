@@ -5,7 +5,9 @@
 
 enum Spheres
 {
-    annihilation
+    annihilation,
+    driftglobe,
+    SPHERES_COUNT = driftglobe + 1
 };
 
 class Sphere
