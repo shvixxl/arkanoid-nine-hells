@@ -16,10 +16,12 @@ enum Maps
 class Brick
 {
     public:
-        Brick(int x, int y, int h);
+        Brick(int x, int y);
         ~Brick();
 
         bool Hit();
+
+        void Update();
         void Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture);
 
         SDL_Rect getRect() { return windowRect; }
@@ -62,6 +64,8 @@ class Power
         SDL_Rect getRect() { return windowRect; }
 
     private:
+        int speed;
+
         int frames;
         int frameDelay;
         
@@ -85,6 +89,10 @@ class MapManager
         static void UpdatePowers();
 
         static void Render();
+       
+        static int getStep() { return step; }
+        static int getNextTranstitionFrames() { return nextTransitionFrames; }
+        static bool isNextTransition();
 
     private:
         static int mapHeight;
@@ -93,6 +101,10 @@ class MapManager
 
         static int step;
         static int current;
+
+        static int nextTransitionFrames;
+        static int nextTransitionFrameDelay;
+        static int nextTransition;
         
         static SDL_Texture* brickTexture;
         static SDL_Texture* crackTexture;

@@ -44,7 +44,7 @@ void Game::init(const char* title, int x, int y, int width, int height, bool ful
     else
     {
         isRunning = true;
-        MapManager::Init(avernus, 80, 12);
+        MapManager::Init(avernus, 60, 12);
         PowerManager::Init();
         EntityManager::addShip(skyship);
     }
@@ -66,6 +66,7 @@ void Game::handleEvents()
             break;
 
         default:
+            PowerManager::HandleEvents(&event);
             EntityManager::ShipHandleEvents(&event);
             break;
     }
@@ -73,15 +74,13 @@ void Game::handleEvents()
 
 void Game::update()
 {
+    Window::Update();
+
     EntityManager::UpdateSpheres();
     
     EntityManager::UpdateShip();
 
-    MapManager::UpdateBackground();
-
-    MapManager::UpdatePowers();
-    
-    MapManager::UpdateBricks();
+    MapManager::Update();
 
     PowerManager::Update();
 }

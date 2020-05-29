@@ -29,8 +29,8 @@ Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
     frames = 4;
     frameDelay = 100;
 
-    windowRect.h = textureRect.h * Window::getMultiplierH();
-    windowRect.w = textureRect.w * Window::getMultiplierW();
+    windowRect.h = textureRect.h;
+    windowRect.w = textureRect.w;
     windowRect.x = x - windowRect.w / 2;
     windowRect.y = y - windowRect.h / 2;
 
@@ -38,8 +38,8 @@ Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
     this->y = windowRect.y;
     this->r = windowRect.w / 2;
 
-    maxSpeed = 15;
-    reduceSpeed = 0.25;
+    maxSpeed = 2;
+    reduceSpeed = 0.1;
 
     this->speedY = maxSpeed + speedY;
     this->speedX = speedX;
@@ -82,22 +82,22 @@ void Sphere::Update()
     // About [+ 1] in speedX formula... Idk why but this necessary to get
     // the same result as on the other side
     //
-    if (192 * Window::getMultiplierW() - windowRect.w - x <= windowRect.w)
+    if (Window::getWidth() - windowRect.w - x <= windowRect.w)
     {
-        speedX -= reduceSpeed * ((windowRect.w) - ((192 * Window::getMultiplierW() - x - windowRect.w) + 1));
+        speedX -= reduceSpeed * ((windowRect.w) - ((Window::getWidth() - x - windowRect.w) + 1));
     }
 
 
 
-    /* // Magic speed limit */
-    /* if (speedX > maxSpeed || speedX < -maxSpeed) */
-    /* { */
-    /*     speedX -= reduceSpeed * (speedX < 0 ? -1 : 1); */
-    /* } */
-    /* if (speedY > maxSpeed || speedY < -maxSpeed) */
-    /* { */
-    /*     speedY -= reduceSpeed * (speedY < 0 ? -1 : 1); */
-    /* } */
+    // Magic speed limit
+    if (speedX > maxSpeed || speedX < -maxSpeed)
+    {
+        speedX = maxSpeed * (speedX < 0 ? -1 : 1);
+    }
+    if (speedY > maxSpeed || speedY < -maxSpeed)
+    {
+        speedY = maxSpeed * (speedY < 0 ? -1 : 1);
+    }
 
     windowRect.x = x;
     windowRect.y = y;

@@ -1,5 +1,6 @@
 #include "../include/MapManager.hpp"
 #include "../include/Window.hpp"
+#include <SDL2/SDL_timer.h>
 
 
 int MapManager::mapHeight;
@@ -9,6 +10,10 @@ int** MapManager::map = nullptr;
 
 int MapManager::step;
 int MapManager::current;
+
+int MapManager::nextTransitionFrames;
+int MapManager::nextTransitionFrameDelay;
+int MapManager::nextTransition;
 
 SDL_Texture* MapManager::backgroundTexture = nullptr;
 SDL_Texture* MapManager::brickTexture = nullptr;
@@ -45,8 +50,12 @@ void MapManager::Init(Maps type, int h, int w)
         map[i] = new int[mapWidth];
     }
 
-    step = 16;
+    step = 12;
     current = 0;
+
+    nextTransitionFrames = 16;
+    nextTransitionFrameDelay = 100;
+    nextTransition = 0;
 
     Generate(2);
     Next();
@@ -70,7 +79,7 @@ void MapManager::Generate(int spire)
     // Chance to make map wider on current Y
     int growthStep = mapHeight / mapWidth;
     int growth = 0;
-    
+
     // If map should have spire (spire != 0)
     if (spire)
     {
@@ -104,6 +113,8 @@ void MapManager::Generate(int spire)
 // Load next <step> rows of bricks on the screen
 void MapManager::Next()
 {
+    nextTransition += nextTransitionFrames;
+
     bricks.clear();
     int previous = current;
     current += step;
@@ -114,7 +125,7 @@ void MapManager::Next()
         {
             if (map[y][x] == 1)
             {
-                bricks.push_back(Brick(x, y, step));
+                bricks.push_back(Brick(x, y - previous));
             }
         }
     }
@@ -123,8 +134,18 @@ void MapManager::Next()
 void MapManager::Update()
 {
     MapManager::UpdateBackground();
-    MapManager::UpdateBricks();
     MapManager::UpdatePowers();
+    MapManager::UpdateBricks();
+
+    if (MapManager::isNextTransition())
+    {
+        nextTransition -= 1;
+    }
+
+    if (bricks.empty())
+    {
+        MapManager::Next();
+    }
 }
 
 void MapManager::UpdateBackground()
@@ -136,8 +157,10 @@ void MapManager::UpdateBricks()
 {
     for (size_t i = 0; i < bricks.size(); ++i)
     {
+        bricks.at(i).Update();
+
         SDL_Rect brickRect = bricks.at(i).getRect();
-        
+
         std::vector<size_t> collided_spheres = EntityManager::SpheresCheckCollision(&brickRect);
 
         for (size_t k = 0; k < collided_spheres.size(); ++k)
@@ -165,9 +188,12 @@ void MapManager::UpdatePowers()
 
         SDL_Rect powerRect = powers.at(i).getRect();
 
-        std::vector<size_t> collided_spheres = EntityManager::SpheresCheckCollision(&powerRect);
-
-        if (!collided_spheres.empty())
+        if (EntityManager::ShipCheckCollision(&powerRect))
+        {
+            PowerManager::GenerateSpell();
+            powers.erase(powers.begin() + i);
+        }
+        else if (powerRect.y + powerRect.h < 0)
         {
             powers.erase(powers.begin() + i);
         }
@@ -189,12 +215,17 @@ void MapManager::Render()
     }
 }
 
+bool MapManager::isNextTransition()
+{
+    return nextTransition > 0 && (SDL_GetTicks() / 100 % 2) != 0;
+}
 
 
 
 
 
-Brick::Brick(int x, int y, int h)
+
+Brick::Brick(int x, int y)
 {
     int type = rand() % 9;
 
@@ -208,10 +239,10 @@ Brick::Brick(int x, int y, int h)
     crackRect.h = brickRect.h;
     crackRect.w = brickRect.w;
 
-    windowRect.x = brickRect.w * x * Window::getMultiplierW();
-    windowRect.y = Window::getHeight() - (brickRect.h * (h - y) * Window::getMultiplierH());
-    windowRect.h = brickRect.h * Window::getMultiplierH();
-    windowRect.w = brickRect.w * Window::getMultiplierW();
+    windowRect.x = brickRect.w * x;
+    windowRect.y = Window::getHeight() + (brickRect.h * y);
+    windowRect.h = brickRect.h;
+    windowRect.w = brickRect.w;
 
     health = 5;
 }
@@ -227,9 +258,17 @@ bool Brick::Hit()
 
     health -= damage;
     crackRect.x += crackRect.w * damage;
-    
+
     // Return true if this brick is broken (health <= 0)
     return !(health > 0);
+}
+
+void Brick::Update()
+{
+    if (MapManager::isNextTransition())
+    {
+        windowRect.y -= (windowRect.h * MapManager::getStep()) / MapManager::getNextTranstitionFrames();
+    }
 }
 
 void Brick::Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture)
@@ -247,7 +286,7 @@ Background::Background()
 {
     textureRect.x = 0;
     textureRect.y = 0;
-    textureRect.h = 192;
+    textureRect.h = 256;
     textureRect.w = 192;
 
     frames = 1;
@@ -255,8 +294,8 @@ Background::Background()
 
     windowRect.x = 0;
     windowRect.y = 0;
-    windowRect.h = textureRect.h * Window::getMultiplierH();
-    windowRect.w = textureRect.w * Window::getMultiplierW();
+    windowRect.h = Window::getHeight();
+    windowRect.w = Window::getWidth();
 }
 
 Background::~Background()
@@ -271,6 +310,11 @@ void Background::Render(SDL_Texture* texture)
 
 void Background::Update()
 {
+    if (MapManager::isNextTransition())
+    {
+        textureRect.y += 1;
+    }
+
     textureRect.x = textureRect.w * ((SDL_GetTicks() / frameDelay) % frames);
 }
 
@@ -286,11 +330,13 @@ Power::Power(SDL_Rect* objectRect)
     textureRect.w = 12;
     textureRect.h = 8;
 
+    speed = 2;
+
     frames = 4;
     frameDelay = 100;
 
-    windowRect.w = textureRect.w * Window::getMultiplierW();
-    windowRect.h = textureRect.h * Window::getMultiplierH();
+    windowRect.w = textureRect.w;
+    windowRect.h = textureRect.h;
     windowRect.x = objectRect->x + objectRect->w / 2 - windowRect.w / 2;
     windowRect.y = objectRect->y + objectRect->h / 2 - windowRect.h / 2;
 }
@@ -302,7 +348,7 @@ Power::~Power()
 
 void Power::Update()
 {
-
+    windowRect.y -= speed;
 }
 
 void Power::Render(SDL_Texture* texture)

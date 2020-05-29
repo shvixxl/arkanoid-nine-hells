@@ -1,7 +1,10 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
-#include <SDL2/SDL_timer.h>
+#include "Ship.hpp"
+#include "Sphere.hpp"
+#include "EntityManager.hpp"
+#include "MapManager.hpp"
 #endif
 
 enum Spells
@@ -27,20 +30,26 @@ class Spell
         bool ready();
 
         void Update();
-        void Render(SDL_Texture* cellTexture, SDL_Texture* spellsTexture);
+        void Render(SDL_Texture* cellTexture, SDL_Texture* spellsTexture, SDL_Texture* numbersTexture);
         
+        void TogglePressed();
 
     private:
         int count;
+        bool isPressed;
 
         Uint32 castTime;
         Uint32 endTime;
 
         SDL_Rect cellTextureRect;
         SDL_Rect spellsTextureRect;
+        SDL_Rect firstNumberTextureRect;
+        SDL_Rect secondNumberTextureRect;
         
         SDL_Rect cellWindowRect;
         SDL_Rect spellsWindowRect;
+        SDL_Rect firstNumberWindowRect;
+        SDL_Rect secondNumberWindowRect;
 };
 
 
@@ -55,23 +64,17 @@ class PowerManager
 
         static void Update();
         static void Render();
-        static void HandleEvents();
+        static void HandleEvents(SDL_Event* event);
 
+        static void SpellSummonSphere(Spheres type);
         static void SpellDisplacement();
-        static void SpellSummonSphere();
         static void SpellHaste();
         static void SpellFindPath();
 
     private:
-        static SDL_Rect dockTextureRect;
-        static SDL_Rect dockWindowRect;
-
         static Spell** spells;
 
-        static SDL_Texture* dockTexture;
         static SDL_Texture* cellTexture;
-        static SDL_Texture* cellSelectedTexture;
-        static SDL_Texture* cellWaitTexture;
         static SDL_Texture* spellsTexture;
         static SDL_Texture* numbersTexture;
 };

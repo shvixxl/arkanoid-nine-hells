@@ -1,5 +1,6 @@
 #include "../include/EntityManager.hpp"
 #include "../include/Window.hpp"
+#include <SDL2/SDL_rect.h>
 #include <cstddef>
 
 std::vector<Sphere> EntityManager::spheres;
@@ -70,14 +71,18 @@ void EntityManager::ShipHandleEvents(SDL_Event* event)
                 case SDLK_RIGHT:
                     ship->Move(-MOVE_RIGHT);
                     break;
-                case SDLK_SPACE:
-                    EntityManager::addSphere(driftglobe, ship->getRect().x + ship->getRect().w / 2, ship->getRect().y + ship->getRect().w, ship->getSpeed(), 0);
-                    break;
                 default:
                     break;
             }
         }
     }
+}
+
+bool EntityManager::ShipCheckCollision(SDL_Rect* objectRect)
+{
+    SDL_Rect shipRect = ship->getRect();
+
+    return SDL_HasIntersection(objectRect, &shipRect);
 }
 
 
@@ -86,6 +91,16 @@ void EntityManager::ShipHandleEvents(SDL_Event* event)
 
 
 // Functions for spheres
+
+void EntityManager::throwSphere(Spheres type)
+{
+    SDL_Rect shipRect = ship->getRect();
+
+    int x = shipRect.x + shipRect.w / 2;
+    int y = shipRect.y + shipRect.h;
+
+    EntityManager::addSphere(type, x, y, ship->getSpeed(), 0);
+}
 
 void EntityManager::addSphere(Spheres type, int x, int y, float speedX, float speedY)
 {
@@ -122,6 +137,7 @@ std::vector<size_t> EntityManager::SpheresCheckCollision(SDL_Rect* objectRect)
             collided_spheres.push_back(i);
         }
     }
+
     return collided_spheres;
 }
 

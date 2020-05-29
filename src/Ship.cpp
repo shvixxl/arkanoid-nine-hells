@@ -22,18 +22,18 @@ Ship::Ship(Ships type)
     move = 0;
     speed = 0;
 
-    speedBoost = 0.5;
-    speedSlow = 0.05;
+    speedBoost = 0.25;
+    speedSlow = 0.025;
 
     textureRect.h = 32;
     textureRect.w = 42;
     textureRect.x = 0;
     textureRect.y = 0;
 
-    windowRect.h = textureRect.h * Window::getMultiplierH();
-    windowRect.w = textureRect.w * Window::getMultiplierW();
+    windowRect.h = textureRect.h;
+    windowRect.w = textureRect.w;
     windowRect.x = Window::getWidth() / 2 - windowRect.w / 2;
-    windowRect.y = 5;
+    windowRect.y = Window::getTopPaddingH();
 
     x = windowRect.x;
 }
@@ -67,9 +67,9 @@ void Ship::Update()
         x = 1;
         speed = 0;
     }
-    else if (x + windowRect.w >= 192 * Window::getMultiplierW())
+    else if (x + windowRect.w >= Window::getWidth())
     {
-        x = 192 * Window::getMultiplierW() - windowRect.w;
+        x = Window::getWidth() - windowRect.w;
         speed = 0;
     }
 

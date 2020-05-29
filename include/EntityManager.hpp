@@ -17,10 +17,11 @@ class EntityManager
         static void RenderShip();
         
         static void ShipHandleEvents(SDL_Event* event);
+        static bool ShipCheckCollision(SDL_Rect* objectRect);
 
 
         // Functions for spheres
-        static void throwSphere(Sphere type);
+        static void throwSphere(Spheres type);
         static void addSphere(Spheres type, int x, int y, float speedX, float speedY);
         
         static void UpdateSpheres();

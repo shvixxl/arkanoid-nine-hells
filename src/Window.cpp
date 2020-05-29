@@ -1,10 +1,8 @@
 #include "../include/Window.hpp"
+#include <SDL2/SDL_render.h>
 
 SDL_Window* Window::window = nullptr;
 SDL_Renderer* Window::renderer = nullptr;
-
-float Window::multiplierW = 1;
-float Window::multiplierH = 1;
 
 void Window::Init(const char* title, int x, int y, int w, int h, int windowFlags)
 {
@@ -23,9 +21,6 @@ void Window::Init(const char* title, int x, int y, int w, int h, int windowFlags
     {
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     }
-
-    multiplierW = w / 256;
-    multiplierH = h / 192;
 }
 
 void Window::Clean()
@@ -50,6 +45,14 @@ SDL_Texture* Window::LoadTexture(const char* filename)
     return texture;
 }
 
+void Window::Update()
+{
+    float scaleX = (float) Window::getRealWidth() / Window::getWidth();
+    float scaleY = (float) Window::getRealHeight() / Window::getHeight();
+
+    SDL_RenderSetScale(renderer, scaleX, scaleY);
+}
+
 void Window::Render(SDL_Texture* texture, SDL_Rect* textureRect, SDL_Rect* windowRect)
 {
     if (SDL_RenderCopy(renderer, texture, textureRect, windowRect) < 0)
@@ -70,6 +73,16 @@ void Window::RenderPresent()
 
 int Window::getWidth()
 {
+    return 192;
+}
+
+int Window::getHeight()
+{
+    return 256;
+}
+
+int Window::getRealWidth()
+{
     int w;
 
     SDL_GetWindowSize(window, &w, NULL);
@@ -77,7 +90,7 @@ int Window::getWidth()
     return w;
 }
 
-int Window::getHeight()
+int Window::getRealHeight()
 {
     int h;
 
@@ -86,3 +99,7 @@ int Window::getHeight()
     return h;
 }
 
+float Window::getTopPaddingH()
+{
+    return 40;
+}

@@ -1,37 +1,20 @@
 #include "../include/PowerManager.hpp"
 #include "../include/Window.hpp"
-#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_keycode.h>
 #include <SDL2/SDL_timer.h>
 
-SDL_Rect PowerManager::dockTextureRect;
-SDL_Rect PowerManager::dockWindowRect;
 
 Spell** PowerManager::spells = nullptr;
 
-SDL_Texture* PowerManager::dockTexture = nullptr;
 SDL_Texture* PowerManager::cellTexture = nullptr;
-SDL_Texture* PowerManager::cellSelectedTexture = nullptr;
-SDL_Texture* PowerManager::cellWaitTexture = nullptr;
 SDL_Texture* PowerManager::spellsTexture = nullptr;
 SDL_Texture* PowerManager::numbersTexture = nullptr;
 
 void PowerManager::Init()
 {
-    dockTextureRect.x = 0;
-    dockTextureRect.y = 0;
-    dockTextureRect.w = 64;
-    dockTextureRect.h = 192;
-
-    dockWindowRect.x = Window::getWidth() - dockTextureRect.w * Window::getMultiplierW();
-    dockWindowRect.y = 0;
-    dockWindowRect.w = dockTextureRect.w * Window::getMultiplierW();
-    dockWindowRect.h = dockTextureRect.h * Window::getMultiplierH();
-
-    dockTexture = Window::LoadTexture("assets/dock.png");
     cellTexture = Window::LoadTexture("assets/spell_cell.png");
-    cellSelectedTexture = Window::LoadTexture("assets/spell_cell_selected.png");
-    cellWaitTexture = Window::LoadTexture("assets/spell_cell_wait.png");
     spellsTexture = Window::LoadTexture("assets/spells.png");
+    numbersTexture = Window::LoadTexture("assets/numbers.png");
 
     spells = new Spell*[SPELLS_COUNT];
     for (int spell = 0; spell < SPELLS_COUNT; ++spell)
@@ -91,20 +74,78 @@ void PowerManager::Update()
 
 void PowerManager::Render()
 {
-    Window::Render(dockTexture, &dockTextureRect, &dockWindowRect);
-
     for (int spell = 0; spell < SPELLS_COUNT; ++spell)
     {
-        if (spells[spell]->ready())
+        spells[spell]->Render(cellTexture, spellsTexture, numbersTexture);
+    }
+}
+
+void PowerManager::HandleEvents(SDL_Event* event)
+{
+    if (event->type == SDL_KEYDOWN && event->key.repeat == 0)
+    {
+        switch (event->key.keysym.sym)
         {
-            spells[spell]->Render(cellTexture, spellsTexture);
+            case SDLK_SPACE:
+                spells[summon_sphere]->TogglePressed();
+                break;
+            case SDLK_1:
+                spells[summon_sphere]->TogglePressed();
+                break;
+            case SDLK_2:
+                spells[displacement]->TogglePressed();
+                break;
+            case SDLK_3:
+                spells[haste]->TogglePressed();
+                break;
+            case SDLK_4:
+                spells[find_path]->TogglePressed();
+                break;
+            default:
+                break;
         }
-        else
+    }
+
+    if (event->type == SDL_KEYUP && event->key.repeat == 0)
+    {
+        switch (event->key.keysym.sym)
         {
-            spells[spell]->Render(cellWaitTexture, spellsTexture);
+            case SDLK_SPACE:
+                spells[summon_sphere]->TogglePressed();
+                SpellSummonSphere(driftglobe);
+                break;
+            case SDLK_1:
+                spells[summon_sphere]->TogglePressed();
+                SpellSummonSphere(driftglobe);
+                break;
+            case SDLK_2:
+                spells[displacement]->TogglePressed();
+                break;
+            case SDLK_3:
+                spells[haste]->TogglePressed();
+                break;
+            case SDLK_4:
+                spells[find_path]->TogglePressed();
+                break;
+            default:
+                break;
         }
     }
 }
+
+// Spells
+void PowerManager::SpellSummonSphere(Spheres type)
+{
+    if (spells[summon_sphere]->ready() && spells[summon_sphere]->getCount() > 0)
+    {
+        EntityManager::throwSphere(type);
+        
+        spells[summon_sphere]->cast(10);
+    }
+}
+
+
+
 
 
 
@@ -115,22 +156,46 @@ Spell::Spell(int spell)
     cellTextureRect.x = 0;
     cellTextureRect.y = 0;
 
-    spellsTextureRect.h = 24;
-    spellsTextureRect.w = 24;
+    spellsTextureRect.h = 32;
+    spellsTextureRect.w = 32;
     spellsTextureRect.x = spellsTextureRect.w * spell;
     spellsTextureRect.y = 0;
 
-    cellWindowRect.h = cellTextureRect.h * Window::getMultiplierH();
-    cellWindowRect.w = cellTextureRect.w * Window::getMultiplierW();
-    cellWindowRect.x = (192 + 17) * Window::getMultiplierW();
-    cellWindowRect.y = (17 + (9 + cellTextureRect.h) * spell) * Window::getMultiplierH();
+    firstNumberTextureRect.h = 6;
+    firstNumberTextureRect.w = 4;
+    firstNumberTextureRect.x = 0;
+    firstNumberTextureRect.y = 0;
 
-    spellsWindowRect.h = spellsTextureRect.h * Window::getMultiplierH();
-    spellsWindowRect.w = spellsTextureRect.w * Window::getMultiplierW();
-    spellsWindowRect.x = cellWindowRect.x + 4 * Window::getMultiplierW();
-    spellsWindowRect.y = cellWindowRect.y + 4 * Window::getMultiplierH();
-   
+    secondNumberTextureRect.h = 6;
+    secondNumberTextureRect.w = 4;
+    secondNumberTextureRect.x = 0;
+    secondNumberTextureRect.y = 0;
+    
+    cellWindowRect.h = cellTextureRect.h;
+    cellWindowRect.w = cellTextureRect.w;
+
+    float padding = (Window::getWidth() - cellWindowRect.w * (SPELLS_COUNT)) / (SPELLS_COUNT + 1);
+
+    cellWindowRect.x = padding + (padding + cellWindowRect.w) * spell;
+    cellWindowRect.y = (Window::getTopPaddingH() - cellWindowRect.h) / 2;
+
+    spellsWindowRect.h = spellsTextureRect.h;
+    spellsWindowRect.w = spellsTextureRect.w;
+    spellsWindowRect.x = cellWindowRect.x;
+    spellsWindowRect.y = cellWindowRect.y;
+
+    firstNumberWindowRect.h = firstNumberTextureRect.h;
+    firstNumberWindowRect.w = firstNumberTextureRect.w;
+    firstNumberWindowRect.x = cellWindowRect.x + 5;
+    firstNumberWindowRect.y = cellWindowRect.y + 22;
+
+    secondNumberWindowRect.h = secondNumberTextureRect.h;
+    secondNumberWindowRect.w = secondNumberTextureRect.w;
+    secondNumberWindowRect.x = cellWindowRect.x + 7;
+    secondNumberWindowRect.y = cellWindowRect.y + 22;
+    
     count = 0;
+    isPressed = 0;
 
     castTime = 0;
     endTime = 0;
@@ -153,8 +218,10 @@ void Spell::addCount(int n)
 
 void Spell::cast(int s)
 {
-    castTime = SDL_GetTicks();
-    endTime = castTime + s * 1000;
+        count -= 1;
+
+        castTime = SDL_GetTicks();
+        endTime = castTime + s * 1000;
 }
 
 bool Spell::ready()
@@ -166,17 +233,61 @@ void Spell::Update()
 {
     if (!ready())
     {
-        cellTextureRect.x = cellTextureRect.w * ((endTime - SDL_GetTicks()) / (SDL_GetTicks() - castTime) / 5);
+        cellTextureRect.x = cellTextureRect.w * ((SDL_GetTicks() - castTime) / ((endTime - castTime) / 5));
+        cellTextureRect.y = 64;
+    }
+    else if (isPressed)
+    {
+        cellTextureRect.y = 32;
+     
+        if (count > 0)
+        {
+            cellTextureRect.x = 0;
+        }
+        else
+        {
+            cellTextureRect.x = 32;
+        }
     }
     else
     {
         cellTextureRect.x = 0;
+        cellTextureRect.y = 0;
+    }
+
+    // Numbers
+    if (count < 10)
+    {
+        firstNumberTextureRect.x = firstNumberTextureRect.w * count;
+        firstNumberWindowRect.x = cellWindowRect.x + 5;
+    }
+    else
+    {
+        firstNumberTextureRect.x = firstNumberWindowRect.w * ((count - (count % 10)) / 10);
+        firstNumberWindowRect.x = cellWindowRect.x + 3;
+        
+        secondNumberTextureRect.x = secondNumberTextureRect.w * (count % 10);
     }
 }
 
-void Spell::Render(SDL_Texture* cellTexture, SDL_Texture* spellsTexture)
+void Spell::Render(SDL_Texture* cellTexture, SDL_Texture* spellsTexture, SDL_Texture* numbersTexture)
 {
     Window::Render(cellTexture, &cellTextureRect, &cellWindowRect);
     Window::Render(spellsTexture, &spellsTextureRect, &spellsWindowRect);
+
+    if (count < 10)
+    {
+        Window::Render(numbersTexture, &firstNumberTextureRect, &firstNumberWindowRect);
+    }
+    else
+    {
+        Window::Render(numbersTexture, &firstNumberTextureRect, &firstNumberWindowRect);
+        Window::Render(numbersTexture, &secondNumberTextureRect, &secondNumberWindowRect);
+    }
+}
+
+void Spell::TogglePressed()
+{
+    isPressed = !isPressed;
 }
 
