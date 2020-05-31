@@ -1,10 +1,9 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
-#include "Ship.hpp"
-#include "Sphere.hpp"
 #include "EntityManager.hpp"
 #include "MapManager.hpp"
+#include "GameManager.hpp"
 #endif
 
 enum Spells
@@ -53,7 +52,7 @@ class Spell
 };
 
 
-class PowerManager
+class SpellManager
 {
     public:
         static void Init();

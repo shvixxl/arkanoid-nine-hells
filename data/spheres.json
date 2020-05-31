@@ -1,0 +1,13 @@
+[
+    "driftglobe":
+    {
+        "en": {
+            "name": "Driftglobe"
+        },
+        
+        "texture": "assets/driftglobe.png",
+        "movement_type": 1,
+        "speed_boost": 0.1,
+        "max_speed": 2
+    }
+]

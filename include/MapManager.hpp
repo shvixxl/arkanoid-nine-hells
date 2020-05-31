@@ -1,17 +1,18 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
-#include "Ship.hpp"
-#include "Sphere.hpp"
-#include "PowerManager.hpp"
 #include "EntityManager.hpp"
+#include "SpellManager.hpp"
+#include <SDL2/SDL_timer.h>
 #endif
 
-enum Maps
+enum Levels
 {
     avernus,
-    MAPS_COUNT = avernus+1
+    LEVELS_COUNT = avernus + 1,
+    LEVELS_NULL
 };
+
 
 class Brick
 {
@@ -23,6 +24,8 @@ class Brick
 
         void Update();
         void Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture);
+
+        void TranstionStep();
 
         SDL_Rect getRect() { return windowRect; }
     private:
@@ -44,6 +47,8 @@ class Background
         void Render(SDL_Texture* texture);
         void Update();
 
+        void TransitionStep();
+
     private:
         int frames;
         int frameDelay;
@@ -61,6 +66,8 @@ class Power
         void Render(SDL_Texture* texture);
         void Update();
 
+        void TranstionStep();
+
         SDL_Rect getRect() { return windowRect; }
 
     private:
@@ -76,7 +83,7 @@ class Power
 class MapManager
 {
     public:
-        static void Init(Maps type, int h, int w);
+        static void Init(Levels type, int h, int w);
 
         static void Clean();
 
@@ -89,10 +96,8 @@ class MapManager
         static void UpdatePowers();
 
         static void Render();
-       
-        static int getStep() { return step; }
-        static int getNextTranstitionFrames() { return nextTransitionFrames; }
-        static bool isNextTransition();
+
+        static Uint32 TransitionStep(Uint32 interval, void*);
 
     private:
         static int mapHeight;
@@ -102,10 +107,10 @@ class MapManager
         static int step;
         static int current;
 
-        static int nextTransitionFrames;
-        static int nextTransitionFrameDelay;
-        static int nextTransition;
-        
+        static int transitionStep;
+        static int currentTransitionStep;
+        static SDL_TimerID transitionTimer;
+
         static SDL_Texture* brickTexture;
         static SDL_Texture* crackTexture;
         static SDL_Texture* backgroundTexture;

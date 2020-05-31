@@ -1,16 +1,18 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
+#include <SDL2/SDL_ttf.h>
 #endif
 
 class Window
 {
     public:
-        static void Init(const char* title, int x, int y, int w, int h, int windowFlags);
+        static bool Init(const char* title, int x, int y, int w, int h, int windowFlags);
         static void Clean();
 
         static SDL_Texture* LoadTexture(const char* filename);
-       
+        static SDL_Texture* LoadText(const char* filename, const char* text, int size, SDL_Color color);
+
         static void Update();
 
         static void Render(SDL_Texture* texture, SDL_Rect* textureRect, SDL_Rect* windowRect);
@@ -26,8 +28,6 @@ class Window
         static int getRealHeight();
 
         static float getTopPaddingH();
-
-        static bool isExist() { return window && renderer; }
 
     private:
         static SDL_Window* window;

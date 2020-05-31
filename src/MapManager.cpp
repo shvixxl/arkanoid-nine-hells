@@ -11,9 +11,9 @@ int** MapManager::map = nullptr;
 int MapManager::step;
 int MapManager::current;
 
-int MapManager::nextTransitionFrames;
-int MapManager::nextTransitionFrameDelay;
-int MapManager::nextTransition;
+int MapManager::transitionStep;
+int MapManager::currentTransitionStep;
+SDL_TimerID MapManager::transitionTimer;
 
 SDL_Texture* MapManager::backgroundTexture = nullptr;
 SDL_Texture* MapManager::brickTexture = nullptr;
@@ -25,7 +25,7 @@ std::vector<Brick> MapManager::bricks;
 std::vector<Power> MapManager::powers;
 
 
-void MapManager::Init(Maps type, int h, int w)
+void MapManager::Init(Levels type, int h, int w)
 {
     switch (type)
     {
@@ -53,9 +53,9 @@ void MapManager::Init(Maps type, int h, int w)
     step = 12;
     current = 0;
 
-    nextTransitionFrames = 16;
-    nextTransitionFrameDelay = 100;
-    nextTransition = 0;
+    transitionStep = 16;
+    currentTransitionStep = 0;
+    transitionTimer = SDL_AddTimer(50, MapManager::TransitionStep, nullptr);
 
     Generate(2);
     Next();
@@ -113,8 +113,6 @@ void MapManager::Generate(int spire)
 // Load next <step> rows of bricks on the screen
 void MapManager::Next()
 {
-    nextTransition += nextTransitionFrames;
-
     bricks.clear();
     int previous = current;
     current += step;
@@ -129,6 +127,8 @@ void MapManager::Next()
             }
         }
     }
+    
+    currentTransitionStep += transitionStep;
 }
 
 void MapManager::Update()
@@ -136,11 +136,6 @@ void MapManager::Update()
     MapManager::UpdateBackground();
     MapManager::UpdatePowers();
     MapManager::UpdateBricks();
-
-    if (MapManager::isNextTransition())
-    {
-        nextTransition -= 1;
-    }
 
     if (bricks.empty())
     {
@@ -190,7 +185,7 @@ void MapManager::UpdatePowers()
 
         if (EntityManager::ShipCheckCollision(&powerRect))
         {
-            PowerManager::GenerateSpell();
+            SpellManager::GenerateSpell();
             powers.erase(powers.begin() + i);
         }
         else if (powerRect.y + powerRect.h < 0)
@@ -215,9 +210,26 @@ void MapManager::Render()
     }
 }
 
-bool MapManager::isNextTransition()
+Uint32 MapManager::TransitionStep(Uint32 interval, void*)
 {
-    return nextTransition > 0 && (SDL_GetTicks() / 100 % 2) != 0;
+    if (transitionStep > 0)
+    {
+        background->TransitionStep();
+
+        for (size_t i = 0; i < bricks.size(); ++i)
+        {
+            bricks.at(i).TranstionStep();
+        }
+
+        for (size_t i = 0; i < powers.size(); ++i)
+        {
+            powers.at(i).TranstionStep();
+        }
+
+        transitionStep -= 1;
+    }
+
+    return interval;
 }
 
 
@@ -265,10 +277,12 @@ bool Brick::Hit()
 
 void Brick::Update()
 {
-    if (MapManager::isNextTransition())
-    {
-        windowRect.y -= (windowRect.h * MapManager::getStep()) / MapManager::getNextTranstitionFrames();
-    }
+
+}
+
+void Brick::TranstionStep()
+{
+    windowRect.y -= 6;
 }
 
 void Brick::Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture)
@@ -310,13 +324,14 @@ void Background::Render(SDL_Texture* texture)
 
 void Background::Update()
 {
-    if (MapManager::isNextTransition())
-    {
-        textureRect.y += 1;
-    }
 
-    textureRect.x = textureRect.w * ((SDL_GetTicks() / frameDelay) % frames);
 }
+
+void Background::TransitionStep()
+{
+    textureRect.y += 1;
+}
+
 
 
 
@@ -357,5 +372,10 @@ void Power::Render(SDL_Texture* texture)
     textureRect.x = ((SDL_GetTicks() / frameDelay) % frames) * textureRect.w;
 
     Window::Render(texture, &textureRect, &windowRect);
+}
+
+void Power::TranstionStep()
+{
+    windowRect.y -= 6;
 }
 

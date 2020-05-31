@@ -1,0 +1,35 @@
+{
+    "en": {
+        "main_menu": {
+            "logo": "assets/logo.png",
+            "buttons": [
+                {"text": "Continue"},
+                {"text": "New Game"},
+                {"text": "Settings"},
+                {"text": "Exit"}
+            ]
+        },
+
+        "new_game": {
+            "buttons": [
+                {"text": "Choose your skyship:"},
+                {"text": "Choose your magic sphere:"}
+            ]
+        },
+
+        "settings_menu": {
+            "buttons": [
+                {"text": "Language: ", "var1":"en"}
+            ]
+        },
+
+        "confirmation": {
+            "header": "Are you sure?",
+            "buttons": [
+                {"text": "No"},
+                {"text": "Yes"}
+            ]
+        }
+    }
+}
+

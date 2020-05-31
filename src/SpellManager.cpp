@@ -1,16 +1,14 @@
-#include "../include/PowerManager.hpp"
+#include "../include/SpellManager.hpp"
 #include "../include/Window.hpp"
-#include <SDL2/SDL_keycode.h>
-#include <SDL2/SDL_timer.h>
 
 
-Spell** PowerManager::spells = nullptr;
+Spell** SpellManager::spells = nullptr;
 
-SDL_Texture* PowerManager::cellTexture = nullptr;
-SDL_Texture* PowerManager::spellsTexture = nullptr;
-SDL_Texture* PowerManager::numbersTexture = nullptr;
+SDL_Texture* SpellManager::cellTexture = nullptr;
+SDL_Texture* SpellManager::spellsTexture = nullptr;
+SDL_Texture* SpellManager::numbersTexture = nullptr;
 
-void PowerManager::Init()
+void SpellManager::Init()
 {
     cellTexture = Window::LoadTexture("assets/spell_cell.png");
     spellsTexture = Window::LoadTexture("assets/spells.png");
@@ -23,18 +21,22 @@ void PowerManager::Init()
     }
 }
 
-void PowerManager::Clean()
+void SpellManager::Clean()
 {
-    for (int spell = 0; spell < SPELLS_COUNT; ++spell)
+    if (spells)
     {
-        delete spells[spell];
-        spells[spell] = nullptr;
-    }
+        for (int spell = 0; spell < SPELLS_COUNT; ++spell)
+        {
+            delete spells[spell];
+            spells[spell] = nullptr;
+        }
 
-    delete[] spells;
+        delete[] spells;
+        spells = nullptr;
+    }
 }
 
-void PowerManager::GenerateSpell()
+void SpellManager::GenerateSpell()
 {
     Spells spell;
     int random = rand() % 100;
@@ -56,15 +58,15 @@ void PowerManager::GenerateSpell()
         spell = find_path;   
     }
     
-    PowerManager::addSpell(spell, 1);
+    SpellManager::addSpell(spell, 1);
 }
 
-void PowerManager::addSpell(Spells spell, int n)
+void SpellManager::addSpell(Spells spell, int n)
 {
     spells[spell]->addCount(n);
 }
 
-void PowerManager::Update()
+void SpellManager::Update()
 {
     for (int spell = 0; spell < SPELLS_COUNT; ++spell)
     {
@@ -72,7 +74,7 @@ void PowerManager::Update()
     }
 }
 
-void PowerManager::Render()
+void SpellManager::Render()
 {
     for (int spell = 0; spell < SPELLS_COUNT; ++spell)
     {
@@ -80,7 +82,7 @@ void PowerManager::Render()
     }
 }
 
-void PowerManager::HandleEvents(SDL_Event* event)
+void SpellManager::HandleEvents(SDL_Event* event)
 {
     if (event->type == SDL_KEYDOWN && event->key.repeat == 0)
     {
@@ -134,13 +136,13 @@ void PowerManager::HandleEvents(SDL_Event* event)
 }
 
 // Spells
-void PowerManager::SpellSummonSphere(Spheres type)
+void SpellManager::SpellSummonSphere(Spheres type)
 {
     if (spells[summon_sphere]->ready() && spells[summon_sphere]->getCount() > 0)
     {
         EntityManager::throwSphere(type);
         
-        spells[summon_sphere]->cast(10);
+        spells[summon_sphere]->cast(5);
     }
 }
 

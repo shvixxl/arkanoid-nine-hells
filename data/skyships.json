@@ -1,0 +1,13 @@
+[
+    "skyship":
+    {
+        "en": {
+            "name": "Skyship"
+        },
+        
+        "texture": "assets/skyship.png",
+        "speed_boost": 0.1,
+        "speed_slow": 0.025
+    }
+]
+

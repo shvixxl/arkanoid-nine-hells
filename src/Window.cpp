@@ -1,26 +1,31 @@
 #include "../include/Window.hpp"
+#include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_ttf.h>
 
 SDL_Window* Window::window = nullptr;
 SDL_Renderer* Window::renderer = nullptr;
 
-void Window::Init(const char* title, int x, int y, int w, int h, int windowFlags)
+bool Window::Init(const char* title, int x, int y, int w, int h, int windowFlags)
 {
     window = SDL_CreateWindow(title, x, y, w, h, windowFlags);
     if (window == NULL)
     {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+        return false;
     }
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == NULL)
     {
         printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+        return false;
     }
-    else
-    {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    }
+        
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+    return true;
 }
 
 void Window::Clean()
@@ -31,7 +36,7 @@ void Window::Clean()
 
 SDL_Texture* Window::LoadTexture(const char* filename)
 {
-    SDL_Surface* image = NULL;
+    SDL_Surface* image = nullptr;
 
     image = IMG_Load(filename);
     if (!image)
@@ -41,6 +46,25 @@ SDL_Texture* Window::LoadTexture(const char* filename)
 
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, image);
     SDL_FreeSurface(image);
+
+    return texture;
+}
+
+SDL_Texture* Window::LoadText(const char* filename, const char* text, int size, SDL_Color color)
+{
+    TTF_Font* font = TTF_OpenFont(filename, size);
+
+    SDL_Surface* surface = nullptr;
+
+    surface  = TTF_RenderText_Solid(font, text, color);
+    if (!surface)
+    {
+        printf("Text %s could not be loaded! TTF_Error: %s\n", text, TTF_GetError());
+    }
+    
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    TTF_CloseFont(font);
 
     return texture;
 }

@@ -31,8 +31,8 @@ find_package(SDL2_image REQUIRED)
 target_link_libraries(${PROJECT_NAME} SDL2::Image)
 
 # Add SDL2_ttf library
-#find_package(SDL2_ttf REQUIRED)
-#target_link_libraries(${PROJECT_NAME} SDL2::TTF)
+find_package(SDL2_ttf REQUIRED)
+target_link_libraries(${PROJECT_NAME} SDL2::TTF)
 
 # Add SDL2_net library
 #find_package(SDL2_net REQUIRED)
@@ -45,4 +45,7 @@ target_link_libraries(${PROJECT_NAME} SDL2::Image)
 # Add SDL2_gfx library
 #find_package(SDL2_gfx REQUIRED)
 #target_link_libraries(${PROJECT_NAME} SDL2::GFX)
+
+# Add jsoncpp library
+target_link_libraries(${PROJECT_NAME} jsoncpp)
 

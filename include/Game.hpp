@@ -1,5 +1,19 @@
 #define GAME
 
+// Standard libraries
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <vector>
+#include <cmath>
+#include <fstream>
+#include <string>
+
+// JSON libraries
+#include <json/json.h>
+#include <json/writer.h>
+
+// SDL libraties
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_render.h>
@@ -9,12 +23,10 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_gamecontroller.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <vector>
-#include <cmath>
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_ttf.h>
+
+
 
 class Game
 {

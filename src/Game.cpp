@@ -1,10 +1,9 @@
 #include "../include/Game.hpp"
 #include "../include/Window.hpp"
-#include "../include/Sphere.hpp"
-#include "../include/PowerManager.hpp"
-#include "../include/MapManager.hpp"
-#include "../include/Ship.hpp"
 #include "../include/EntityManager.hpp"
+#include "../include/MapManager.hpp"
+#include "../include/SpellManager.hpp"
+#include "../include/GameManager.hpp"
 
 void Game::init(const char* title, int x, int y, int width, int height, bool fullscreen)
 {
@@ -33,20 +32,34 @@ void Game::init(const char* title, int x, int y, int width, int height, bool ful
         success = false;
     }
 
+    // Inititalize SDL_ttf
+    if (TTF_Init() < 0)
+    {
+        printf("Failed to initialize TTF support! TTF_Error: %s\n", TTF_GetError());
+        success = false;
+    }
+
     // Initializing window and renderer
-    Window::Init(title, x, y, width, height, windowFlags);
+    if (!Window::Init(title, x, y, width, height, windowFlags))
+    {
+        success = false;
+    }
+
+    // Initialize GameManager
+    if (!GameManager::Init())
+    {
+        success = false;
+    }
 
     // Run the game
-    if (!success && !Window::isExist())
+    if (!success)
     {
         isRunning = false;
     }
     else
     {
         isRunning = true;
-        MapManager::Init(avernus, 60, 12);
-        PowerManager::Init();
-        EntityManager::addShip(skyship);
+        GameManager::LoadScene(main_menu);
     }
 }
 
@@ -66,8 +79,10 @@ void Game::handleEvents()
             break;
 
         default:
-            PowerManager::HandleEvents(&event);
-            EntityManager::ShipHandleEvents(&event);
+            if (GameManager::HandleEvents(&event) == -1)
+            {
+                isRunning = false;
+            }
             break;
     }
 }
@@ -76,37 +91,25 @@ void Game::update()
 {
     Window::Update();
 
-    EntityManager::UpdateSpheres();
-    
-    EntityManager::UpdateShip();
-
-    MapManager::Update();
-
-    PowerManager::Update();
+    GameManager::Update();
 }
 
 void Game::render()
 {
     Window::RednerClear();
 
-    MapManager::Render();
-    
-    EntityManager::RenderShip();
-
-    EntityManager::RenderSpheres();
-
-    PowerManager::Render();
+    GameManager::Render();
 
     Window::RenderPresent();
 }
 
 void Game::clean()
 {
-    EntityManager::Clean();
-
-    MapManager::Clean();
+    GameManager::Clean();
 
     Window::Clean();
+
+    TTF_Quit();
 
     IMG_Quit();
 
