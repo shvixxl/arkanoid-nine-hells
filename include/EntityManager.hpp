@@ -1,6 +1,7 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
+#include "Timer.hpp"
 #endif
 
 
@@ -32,10 +33,13 @@ class Ship
 
         void Power();
 
-        SDL_Rect getRect() { return windowRect; }
+        SDL_Rect getRect() { return paddleRect; }
         float getSpeed() { return speed; }
 
     private:
+        Json::Value data;
+        Ships type;
+
         // To determine direction (MOVE_LEFT, MOVE_RIGHT)
         int move;
 
@@ -52,6 +56,7 @@ class Ship
 
         SDL_Rect textureRect;
         SDL_Rect windowRect;
+        SDL_Rect paddleRect;
 };
 
 
@@ -69,16 +74,26 @@ class Sphere
         Sphere(Spheres type, int x, int y, float speedX, float speedY);
         ~Sphere();
 
-        void Update();
+        void Clean();
+
+        int Update();
         void Render();
 
         bool CheckCollision(SDL_Rect* objectRect);
         void Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeedY);
 
+        int Damage();
+
         SDL_Rect getRect() { return windowRect; }
 
     private:
-        float r;
+        Json::Value data;
+        Spheres type;
+       
+        int damage;
+
+        int movement_type;
+        float max_speed;
 
         float x;
         float y;
@@ -86,11 +101,9 @@ class Sphere
         float speedY;
         float speedX;
 
-        float maxSpeed;
-        float reduceSpeed;
-
+        Timer* animation_timer;
+        int frame;
         int frames;
-        int frameDelay;
 
         SDL_Texture* texture;
 

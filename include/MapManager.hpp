@@ -1,9 +1,9 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
+#include "Timer.hpp"
 #include "EntityManager.hpp"
 #include "SpellManager.hpp"
-#include <SDL2/SDL_timer.h>
 #endif
 
 enum Levels

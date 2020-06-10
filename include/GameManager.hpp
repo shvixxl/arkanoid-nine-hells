@@ -1,6 +1,7 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
+#include "Timer.hpp"
 #include "EntityManager.hpp"
 #include "MapManager.hpp"
 #include "SpellManager.hpp"
@@ -55,7 +56,7 @@ class Object
         
         void Clean();
         void Render();
-    
+
     private:
         SDL_Texture* texture;
 

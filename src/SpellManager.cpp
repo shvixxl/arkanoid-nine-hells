@@ -55,7 +55,7 @@ void SpellManager::GenerateSpell()
     }
     else if (random < 100)
     {
-        spell = find_path;   
+        spell = find_path;
     }
     
     SpellManager::addSpell(spell, 1);

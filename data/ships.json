@@ -1,4 +1,4 @@
-[
+{
     "skyship":
     {
         "en": {
@@ -6,8 +6,11 @@
         },
         
         "texture": "assets/skyship.png",
+
+        "paddle_width": 24,
+
         "speed_boost": 0.1,
         "speed_slow": 0.025
     }
-]
+}
 

@@ -1,6 +1,4 @@
 #include "../include/GameManager.hpp"
-#include <SDL2/SDL_keycode.h>
-#include <SDL2/SDL_timer.h>
 
 Scenes GameManager::currentScene;
 Levels GameManager::currentLevel;
@@ -33,7 +31,7 @@ bool GameManager::Init()
     file.close();
 
     // Load data files
-    // 
+    //
     // menu
     file.open("data/menu.json");
     if (!file.is_open())
@@ -178,7 +176,7 @@ int GameManager::HandleEvents(SDL_Event* event)
     else if (currentScene == level)
     {
         // Open menu in game
-        if (event->key.keysym.sym == SDLK_ESCAPE)
+        if (event->type == SDL_KEYDOWN && event->key.keysym.sym == SDLK_ESCAPE)
         {
             GameManager::LoadScene(main_menu);
         }
@@ -212,7 +210,7 @@ void GameManager::Update()
 
 void GameManager::Render()
 {
-    if (currentScene == level)
+    if (currentLevel != LEVELS_NULL)
     {
         MapManager::Render();
 
@@ -305,7 +303,7 @@ void GameManager::LoadScene(Scenes scene)
     else if (scene == level)
     {
         GameManager::clearMenu();
-
+        
         if (currentLevel == LEVELS_NULL)
         {
             MapManager::Init(avernus, 60, 12);
@@ -356,15 +354,6 @@ void GameManager::changeSelectedButton(int newButton)
 
 void GameManager::clearMenu()
 {
-    if (currentLevel != LEVELS_NULL)
-    {
-        SpellManager::Clean();
-
-        EntityManager::Clean();
-
-        MapManager::Clean();
-    }
-    
     // Clear menu
     if (buttons)
     {
@@ -383,7 +372,6 @@ void GameManager::clearMenu()
     {
         objects.at(i).Clean();
     }
-
     objects.clear();
 }
 

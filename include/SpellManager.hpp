@@ -1,6 +1,7 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
+#include "Timer.hpp"
 #include "EntityManager.hpp"
 #include "MapManager.hpp"
 #include "GameManager.hpp"

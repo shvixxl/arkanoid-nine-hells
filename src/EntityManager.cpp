@@ -1,5 +1,7 @@
 #include "../include/EntityManager.hpp"
 #include "../include/Window.hpp"
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_shape.h>
 
 std::vector<Sphere> EntityManager::spheres;
 Ship* EntityManager::ship = nullptr;
@@ -9,6 +11,10 @@ void EntityManager::Clean()
     delete ship;
     ship = nullptr;
 
+    for (auto i = spheres.begin(); i != spheres.end(); i++)
+    {
+        i->Clean();
+    }
     spheres.clear();
 }
 
@@ -95,7 +101,7 @@ void EntityManager::throwSphere(Spheres type)
     SDL_Rect shipRect = ship->getRect();
 
     int x = shipRect.x + shipRect.w / 2;
-    int y = shipRect.y + shipRect.h;
+    int y = shipRect.y + shipRect.h + 10;
 
     EntityManager::addSphere(type, x, y, ship->getSpeed(), 0);
 }
@@ -110,7 +116,11 @@ void EntityManager::UpdateSpheres()
 {
     for (size_t i = 0; i < spheres.size(); ++i)
     {
-        spheres.at(i).Update();
+        if (spheres.at(i).Update() == -1)
+        {
+            spheres.erase(spheres.begin() + i);
+            i -= 1;
+        }
     }
 }
 
@@ -154,25 +164,32 @@ void EntityManager::SpheresRebound(size_t id, SDL_Rect* objectRect, float object
 
 Ship::Ship(Ships type)
 {
-    const char* filename;
+    std::ifstream file("data/ships.json");
+    if (!file.is_open())
+    {
+        printf("Some data files is missing!");
+    }
+    file >> data;
+    file.close();
+
     switch (type)
     {
         case skyship:
-            filename = "assets/skyship.png";
+            this->type = skyship;
+            data = data["skyship"];
             break;
 
         default:
-            filename = "assets/skyship.png";
             break;
     }
 
-    texture = Window::LoadTexture(filename);
+    texture = Window::LoadTexture(data["texture"].asString().c_str());
 
     move = 0;
     speed = 0;
 
-    speedBoost = 0.1;
-    speedSlow = 0.025;
+    speedBoost = data["speed_boost"].asFloat();
+    speedSlow = data["speed_slow"].asFloat();
 
     textureRect.h = 32;
     textureRect.w = 42;
@@ -184,7 +201,12 @@ Ship::Ship(Ships type)
     windowRect.x = Window::getWidth() / 2 - windowRect.w / 2;
     windowRect.y = Window::getTopPaddingH();
 
-    x = windowRect.x;
+    paddleRect.h = 32;
+    paddleRect.w = data["paddle_width"].asInt();
+    paddleRect.x = Window::getWidth() / 2 - paddleRect.w / 2;
+    paddleRect.y = windowRect.y;
+
+    x = paddleRect.x;
 }
 
 Ship::~Ship()
@@ -203,24 +225,25 @@ void Ship::Update()
     {
         speed += speedBoost;
     }
-    
+
     Slow();
 
     x += speed;
 
     // Change position
-    if (x <= 1)
+    if (x < 1)
     {
         x = 1;
         speed = 0;
     }
-    else if (x + windowRect.w >= Window::getWidth())
+    else if (x + paddleRect.w > Window::getWidth())
     {
-        x = Window::getWidth() - windowRect.w;
+        x = Window::getWidth() - paddleRect.w;
         speed = 0;
     }
 
-    windowRect.x = x;
+    paddleRect.x = x;
+    windowRect.x = paddleRect.x - ((textureRect.w - paddleRect.w) / 2);
 }
 
 void Ship::Render()
@@ -263,27 +286,35 @@ void Ship::Power()
 
 Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
 {
-    const char* filename;
+    std::ifstream file("data/spheres.json");
+    if (!file.is_open())
+    {
+        printf("Some data files is missing!");
+    }
+    file >> data;
+    file.close();
+
     switch (type)
     {
         case driftglobe:
-            filename = "assets/driftglobe.png";
+            this->type = driftglobe;
+            data = data["driftglobe"];
             break;
 
         default:
-            filename = "assets/SphereA.png";
             break;
     }
 
-    texture = Window::LoadTexture(filename);
+    texture = Window::LoadTexture(data["texture"].asString().c_str());
 
     textureRect.h = 16;
     textureRect.w = 16;
     textureRect.x = 0;
     textureRect.y = 0;
 
+    animation_timer = new Timer(100);
+    frame = 0;
     frames = 4;
-    frameDelay = 100;
 
     windowRect.h = textureRect.h;
     windowRect.w = textureRect.w;
@@ -292,207 +323,187 @@ Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
 
     this->x = windowRect.x;
     this->y = windowRect.y;
-    this->r = windowRect.w / 2;
 
-    maxSpeed = 2;
-    reduceSpeed = 0.1;
+    movement_type = data["movement_type"].asInt();
+    max_speed = data["max_speed"].asFloat();
 
-    this->speedY = maxSpeed + speedY;
+    this->speedY = data["start_speed"].asFloat() + speedY;
     this->speedX = speedX;
 }
 
 Sphere::~Sphere()
 {
-    //SDL_DestroyTexture(texture);
+
 }
 
-void Sphere::Update()
+void Sphere::Clean()
 {
-    // Movement
-    x += speedX;
-    y += speedY;
+    SDL_DestroyTexture(texture);
+}
 
-    // Borders collision
+int Sphere::Update()
+{
+    // ----MOVEMENT----
+    // Types:
+    //
+    // 1 - standard
+    // 2 - gravity
+    
+    // ---Speed changes---
+    if (movement_type == 1)
+    {
 
-    // Top border
+    }
+    else if (movement_type == 2)
+    {
+        speedY += data["speed_boost"].asFloat() * (speedY >= 0 ? 1 : -1);
+    }
+
+
+    // ---Borders collision---
+    // If above top border then delete ball (return -1 to EntityManager)
     if (y + windowRect.h < 1)
     {
-
+        return -1;
     }
-    // Bottom border
-    if (y + windowRect.h >= Window::getHeight())
+    // Bottom
+    if (y + windowRect.h > Window::getHeight() && speedY > 0)
     {
-        speedY *= -1;
+        if (movement_type == 2)
+        {
+            speedY = data["start_speed"].asFloat() * -1;
+        }
+        else
+        {
+            speedY *= -1;
+        }
+
         y = Window::getHeight() - windowRect.h;
     }
-    // Left border
-    if (x <= windowRect.w)
+    // Right
+    if (x < 0)
     {
-        speedX += reduceSpeed * (windowRect.w - x);
+        speedX *= -1;
+        x = 0;
     }
-    // Right border
-    // This is opposite border to the left so here is a little confusing formula:
-    //
-    // [Window::getWidth - windowRect.w - x] equal to the x on the other side
-    // 
-    // About [+ 1] in speedX formula... Idk why but this necessary to get
-    // the same result as on the other side
-    //
-    if (Window::getWidth() - windowRect.w - x <= windowRect.w)
+    // Left
+    if (x + windowRect.w > Window::getWidth())
     {
-        speedX -= reduceSpeed * ((windowRect.w) - ((Window::getWidth() - x - windowRect.w) + 1));
+        speedX *= -1;
+        x = Window::getWidth() - windowRect.w;
     }
 
-
-
-    // Magic speed limit
-    if (speedX > maxSpeed || speedX < -maxSpeed)
+    // ---Speed Limit---
+    if (speedX > max_speed)
     {
-        speedX = maxSpeed * (speedX < 0 ? -1 : 1);
+        speedX = max_speed;
     }
-    if (speedY > maxSpeed || speedY < -maxSpeed)
+    else if (speedX < -max_speed)
     {
-        speedY = maxSpeed * (speedY < 0 ? -1 : 1);
+        speedX = -max_speed;
     }
 
+    // ---Change position---
+    x += speedX;
+    y += speedY;
     windowRect.x = x;
     windowRect.y = y;
+
+    return 0;
 }
 
 void Sphere::Render()
 {
     // Animation
-    textureRect.x = ((SDL_GetTicks() / frameDelay) % frames) * textureRect.w;
+    if (animation_timer->Ready())
+    {
+        frame += 1;
+        if (frame >= frames)
+        {
+            frame = 0;
+        }
+        textureRect.x = (frame) * textureRect.w;
+
+        animation_timer->Restart();
+    }
 
     Window::Render(texture, &textureRect, &windowRect);
 }
 
 bool Sphere::CheckCollision(SDL_Rect* objectRect)
 {
-    float centerX = x + r;
-    float centerY = y + r;
-
-    float closestX;
-    float closestY;
-
-    // Find the closest X on object to the center of Sphere
-    if (centerX < objectRect->x)
+    if ((x >= objectRect->x + objectRect->w) ||
+        (x + windowRect.w <= objectRect->x) ||
+        (y >= objectRect->y + objectRect->h) ||
+        (y + windowRect.h <= objectRect->y))
     {
-        closestX = objectRect->x;
-    }
-    else if (centerX > objectRect->x + objectRect->w)
-    {
-        closestX = objectRect->x + objectRect->w;
-    }
-    else
-    {
-        closestX = centerX;
+        return false;
     }
 
-    // Find the closest Y on object to the center of Sphere
-    if (centerY < objectRect->y)
-    {
-        closestY = objectRect->y;
-    }
-    else if (centerY > objectRect->y + objectRect->h)
-    {
-        closestY = objectRect->y + objectRect->h;
-    }
-    else
-    {
-        closestY = centerY;
-    }
-
-    // If distance between the closest point on object to
-    // the center of Sphere is less than radius then there is collision!
-    if (pow(centerX - closestX, 2) + pow(centerY - closestY, 2) < pow(r, 2))
-    {
-        return true;
-    }
-    
-    return false;
+    return true;
 }
 
 void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeedY)
 {
+    float deltaX = 0;
+    float deltaY = 0;
 
-    float centerX = x + r;
-    float centerY = y + r;
-
-    float closestX;
-    float closestY;
-
-    // Find the closest X on object to the center of Sphere
-    if (centerX < objectRect->x)
+    // deltaX
+    if (x < objectRect->x)
     {
-        closestX = objectRect->x;
+        deltaX = objectRect->x - x;
     }
-    else if (centerX > objectRect->x + objectRect->w)
+    else if (x + windowRect.w > objectRect->x + objectRect->w)
     {
-        closestX = objectRect->x + objectRect->w;
-    }
-    else
-    {
-        closestX = centerX;
+        deltaX = (objectRect->x + objectRect->w) - (x + windowRect.w);
     }
 
-    // Find the closest Y on object to the center of Sphere
-    if (centerY < objectRect->y)
+    // deltaY
+    if (y < objectRect->y)
     {
-        closestY = objectRect->y;
+        deltaY = objectRect->y - y;
     }
-    else if (centerY > objectRect->y + objectRect->h)
+    else if(y + windowRect.h > objectRect->y + objectRect->h)
     {
-        closestY = objectRect->y + objectRect->h;
-    }
-    else
-    {
-        closestY = centerY;
+        deltaY = (objectRect->y + objectRect->h) - (y + windowRect.h);
     }
 
-    float deltaX = abs(closestX - centerX);
-    float deltaY = abs(closestY - centerY);
-
-    // Here rebound is happen
-    //
-    // From inside of the object?? It is possible with high speed
-    // of the ball and should be fixed... (TODO)
-    if (deltaX == 0 && deltaY == 0)
+    // Rebound
+    if (abs(deltaX) >= abs(deltaY))
     {
-
-    }
-    // From North or South side. Just change Y direction to the opposite
-    // if it isn't done already
-    else if (deltaX == 0)
-    {
-        if ((closestY > centerY && speedY > 0) || (closestY < centerY && speedY < 0))
+        // West
+        if (deltaX > 0 && speedX > 0)
         {
-            speedY *= -1;
+            speedX *= -1;
         }
-    }
-    // From West or East side. Just change X direction to the opposite
-    // if it isn't done already
-    else if (deltaY == 0)
-    {
-        if ((closestX > centerX && speedX > 0) || (closestX < centerX && speedX < 0))
+        // East
+        else if (deltaX < 0 && speedX < 0)
         {
             speedX *= -1;
         }
     }
-    // Corners.. Change (TODO) 
     else
     {
-        if ((closestY > centerY && speedY > 0) || (closestY < centerY && speedY < 0))
+        // North
+        if (deltaY > 0 && speedY > 0)
         {
-            speedY *= -1;
+            if (movement_type == 2)
+            {
+                speedY = data["start_speed"].asFloat() * -1;
+            }
         }
-        else if ((closestX > centerX && speedX > 0) || (closestX < centerX && speedX < 0))
+        // South
+        else if (deltaY < 0 && speedY < 0)
         {
-            speedX *= -1;
+            if (movement_type == 2)
+            {
+                speedY = data["start_speed"].asFloat();
+            }
+
         }
     }
 
-    // Transfer speed from object to ball (TODO when "corner rebound" will complete)
+    // Add object speed to sphere speed
     speedX += objectSpeedX;
     speedY += objectSpeedY;
 }

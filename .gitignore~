@@ -1,9 +1,6 @@
 # Project executables
 ArkanoidNineHells
 
-# Game config
-config.json
-
 # IDE files
 .undodir
 

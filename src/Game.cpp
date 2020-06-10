@@ -1,5 +1,6 @@
 #include "../include/Game.hpp"
 #include "../include/Window.hpp"
+#include "../include/Timer.hpp"
 #include "../include/EntityManager.hpp"
 #include "../include/MapManager.hpp"
 #include "../include/SpellManager.hpp"
