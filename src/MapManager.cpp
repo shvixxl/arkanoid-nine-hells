@@ -13,7 +13,7 @@ int MapManager::current;
 
 int MapManager::transitionStep;
 int MapManager::currentTransitionStep;
-SDL_TimerID MapManager::transitionTimer;
+Timer* MapManager::transitionTimer;
 
 SDL_Texture* MapManager::backgroundTexture = nullptr;
 SDL_Texture* MapManager::brickTexture = nullptr;
@@ -55,8 +55,8 @@ void MapManager::Init(Levels type, int h, int w)
 
     transitionStep = 16;
     currentTransitionStep = 0;
-    transitionTimer = SDL_AddTimer(50, MapManager::TransitionStep, nullptr);
-
+    transitionTimer = new Timer(50);
+    
     Generate(2);
     Next();
 }
@@ -77,7 +77,7 @@ void MapManager::Generate(int spire)
     int firstX, lastX;
 
     // Chance to make map wider on current Y
-    int growthStep = mapHeight / mapWidth;
+    int growthStep = mapHeight / mapWidth * 2;
     int growth = 0;
 
     // If map should have spire (spire != 0)
@@ -94,7 +94,6 @@ void MapManager::Generate(int spire)
             map[y][x] = 1;
         }
 
-        growth++;
 
         if (growth >= growthStep)
         {
@@ -105,8 +104,12 @@ void MapManager::Generate(int spire)
                 firstX--;
             }
             if (lastX < mapWidth - 1)
+            {
                 lastX++;
             }
+        }
+
+        growth++;
     }
 }
 
@@ -133,6 +136,8 @@ void MapManager::Next()
 
 void MapManager::Update()
 {
+    MapManager::TransitionStep();
+
     MapManager::UpdateBackground();
     MapManager::UpdatePowers();
     MapManager::UpdateBricks();
@@ -210,9 +215,9 @@ void MapManager::Render()
     }
 }
 
-Uint32 MapManager::TransitionStep(Uint32 interval, void*)
+void MapManager::TransitionStep()
 {
-    if (transitionStep > 0)
+    if (currentTransitionStep > 0 && transitionTimer->Ready())
     {
         background->TransitionStep();
 
@@ -226,10 +231,10 @@ Uint32 MapManager::TransitionStep(Uint32 interval, void*)
             powers.at(i).TranstionStep();
         }
 
-        transitionStep -= 1;
-    }
+        currentTransitionStep -= 1;
 
-    return interval;
+        transitionTimer->Restart();
+    }
 }
 
 

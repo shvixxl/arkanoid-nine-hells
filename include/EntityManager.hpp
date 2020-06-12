@@ -93,7 +93,7 @@ class Sphere
         bool CheckCollision(SDL_Rect* objectRect);
         void Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeedY);
 
-        int Damage();
+        void FindPath();
 
         SDL_Rect getRect() { return windowRect; }
 
@@ -101,8 +101,6 @@ class Sphere
         Json::Value data;
         Spheres type;
        
-        int damage;
-
         int movement_type;
         float max_speed;
 

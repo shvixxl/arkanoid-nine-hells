@@ -4,7 +4,7 @@
             "name": "Summon Sphere"
         },
 
-        "cooldown": 3,
+        "cooldown": 0,
         "duration": 0
     },
 

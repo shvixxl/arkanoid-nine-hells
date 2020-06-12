@@ -124,8 +124,8 @@ void SpellManager::HandleEvents(SDL_Event* event)
         if (event->key.keysym.sym == SDLK_SPACE ||
             event->key.keysym.sym == SDLK_1)
         {
-            if (spells[summon_sphere]->cast(data["driftglobe"]["cooldown"].asInt(),
-                                            data["driftglobe"]["duration"].asInt()))
+            if (spells[summon_sphere]->cast(data["summon_sphere"]["cooldown"].asInt(),
+                                            data["summon_sphere"]["duration"].asInt()))
             {
                 EntityManager::throwSphere(driftglobe);
             }
@@ -298,7 +298,10 @@ void Spell::Update()
 {
     if (!ready())
     {
-        cellTextureRect.x = cellTextureRect.w * ((SDL_GetTicks() - castTime) / ((endTime - castTime) / 5));
+        if (readyTime - castTime != 0)
+        {
+            cellTextureRect.x = cellTextureRect.w * ((SDL_GetTicks() - castTime) / ((readyTime - castTime) / 5));
+        }
         cellTextureRect.y = 64;
     }
     else if (isPressed)

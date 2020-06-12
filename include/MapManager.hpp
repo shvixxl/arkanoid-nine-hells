@@ -98,7 +98,7 @@ class MapManager
 
         static void Render();
 
-        static Uint32 TransitionStep(Uint32 interval, void*);
+        static void TransitionStep();
 
     private:
         static int mapHeight;
@@ -110,7 +110,7 @@ class MapManager
 
         static int transitionStep;
         static int currentTransitionStep;
-        static SDL_TimerID transitionTimer;
+        static Timer* transitionTimer;
 
         static SDL_Texture* brickTexture;
         static SDL_Texture* crackTexture;

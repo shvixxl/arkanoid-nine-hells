@@ -625,3 +625,8 @@ void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeed
     speedY += objectSpeedY;
 }
 
+void FindPath()
+{
+
+}
+
