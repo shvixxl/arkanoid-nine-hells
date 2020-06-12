@@ -73,9 +73,10 @@ class Power
     private:
         int speed;
 
+        Timer* animation_timer;
         int frames;
-        int frameDelay;
-        
+        int frame;
+
         SDL_Rect textureRect;
         SDL_Rect windowRect;
 };

@@ -1,6 +1,8 @@
 #include "../include/EntityManager.hpp"
 #include "../include/Window.hpp"
+#include "../include/SpellManager.hpp"
 #include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_shape.h>
 
 std::vector<Sphere> EntityManager::spheres;
@@ -195,7 +197,7 @@ Ship::Ship(Ships type)
     textureRect.w = 42;
     textureRect.x = 0;
     textureRect.y = 0;
-
+    
     windowRect.h = textureRect.h;
     windowRect.w = textureRect.w;
     windowRect.x = Window::getWidth() / 2 - windowRect.w / 2;
@@ -207,6 +209,14 @@ Ship::Ship(Ships type)
     paddleRect.y = windowRect.y;
 
     x = paddleRect.x;
+    
+    animation_timer = new Timer(50);
+    lastX = x;
+    frames = 1;
+    frame = rand() % 1;
+
+    isDisplaced = false;
+    isHasted = false;
 }
 
 Ship::~Ship()
@@ -216,6 +226,9 @@ Ship::~Ship()
 
 void Ship::Update()
 {
+    Displace();
+    Haste();
+
     // Speed change
     if (move == MOVE_LEFT)
     {
@@ -242,12 +255,79 @@ void Ship::Update()
         speed = 0;
     }
 
+    // Haste effect (save position)
+    if (animation_timer->Ready())
+    {
+        lastX = x;
+    }
+
     paddleRect.x = x;
-    windowRect.x = paddleRect.x - ((textureRect.w - paddleRect.w) / 2);
+    windowRect.x = paddleRect.x - ((windowRect.w - paddleRect.w) / 2);
 }
 
 void Ship::Render()
 {
+
+    if (isDisplaced)
+    {
+
+        SDL_Rect displaceRect = windowRect;
+
+        Uint8 tempAlpha;
+        SDL_GetTextureAlphaMod(texture, &tempAlpha);
+
+        if (animation_timer->Ready())
+        {
+            tempAlpha = rand() % 32 + 96;
+        }
+
+        for (int i = 1; i <= 2; i++)
+        {
+            SDL_SetTextureAlphaMod(texture, tempAlpha / i);
+
+            displaceRect.x -= (windowRect.w / SpellManager::getDisplacement()) / 2 * i;
+            Window::Render(texture, &textureRect, &displaceRect);
+            displaceRect.x = windowRect.x;
+
+            displaceRect.x += (windowRect.w / SpellManager::getDisplacement()) / 2 * i;
+            Window::Render(texture, &textureRect, &displaceRect);
+            displaceRect.x = windowRect.x;
+        }
+
+        SDL_SetTextureAlphaMod(texture, tempAlpha);
+    }
+
+    if (isHasted)
+    {
+        SDL_Rect hasteRect = windowRect;
+
+        Uint8 tempAlpha;
+        SDL_GetTextureAlphaMod(texture, &tempAlpha);
+
+        for (int i = 1; i < abs(lastX - x); i++)
+        {
+            SDL_SetTextureAlphaMod(texture, 48);
+            hasteRect.x -= 2 *  (lastX > x ? -1 : 1);
+
+            Window::Render(texture, &textureRect, &hasteRect);
+        }
+
+        SDL_SetTextureAlphaMod(texture, tempAlpha);
+    }
+
+    // Animation
+    if (animation_timer->Ready())
+    {
+        frame += 1;
+        if (frame >= frames)
+        {
+            frame = 0;
+        }
+        textureRect.x = (frame) * textureRect.w;
+
+        animation_timer->Restart();
+    }
+
     Window::Render(texture, &textureRect, &windowRect);
 }
 
@@ -272,9 +352,46 @@ void Ship::Slow()
     }
 }
 
-void Ship::Power()
+void Ship::Displace()
 {
+    if (SpellManager::SpellDisplacement() && !isDisplaced)
+    {
+        paddleRect.w *= SpellManager::getDisplacement();
+        paddleRect.x -= (paddleRect.w - paddleRect.w / SpellManager::getDisplacement()) / 2;
+        x = paddleRect.x;
 
+        isDisplaced = true;
+
+        SDL_SetTextureAlphaMod(texture, 128);
+    }
+    else if (!SpellManager::SpellDisplacement() && isDisplaced)
+    {
+        paddleRect.w /= SpellManager::getDisplacement();
+        paddleRect.x += (paddleRect.w * SpellManager::getDisplacement() - paddleRect.w) / 2;
+        x = paddleRect.x;
+
+        SDL_SetTextureAlphaMod(texture, 255);
+        
+        isDisplaced = false;
+    }
+}
+
+void Ship::Haste()
+{
+    if (SpellManager::SpellHaste() && !isHasted)
+    {
+        speedBoost *= SpellManager::getHaste();
+        speedSlow *= SpellManager::getHaste();
+
+        isHasted = true;
+    }
+    else if (!SpellManager::SpellHaste() && isHasted)
+    {
+        speedBoost /= SpellManager::getHaste();
+        speedSlow /= SpellManager::getHaste();
+        
+        isHasted = false;
+    }
 }
 
 
@@ -313,8 +430,8 @@ Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
     textureRect.y = 0;
 
     animation_timer = new Timer(100);
-    frame = 0;
     frames = 4;
+    frame = rand() % 4;
 
     windowRect.h = textureRect.h;
     windowRect.w = textureRect.w;

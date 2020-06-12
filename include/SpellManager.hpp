@@ -5,6 +5,7 @@
 #include "EntityManager.hpp"
 #include "MapManager.hpp"
 #include "GameManager.hpp"
+#include <json/value.h>
 #endif
 
 enum Spells
@@ -26,12 +27,13 @@ class Spell
         int getCount();
         void addCount(int n);
 
-        void cast(int s);
+        bool cast(int cooldown, int duration);
         bool ready();
+        bool end();
 
         void Update();
         void Render(SDL_Texture* cellTexture, SDL_Texture* spellsTexture, SDL_Texture* numbersTexture);
-        
+
         void TogglePressed();
 
     private:
@@ -39,6 +41,7 @@ class Spell
         bool isPressed;
 
         Uint32 castTime;
+        Uint32 readyTime;
         Uint32 endTime;
 
         SDL_Rect cellTextureRect;
@@ -66,10 +69,15 @@ class SpellManager
         static void Render();
         static void HandleEvents(SDL_Event* event);
 
-        static void SpellSummonSphere(Spheres type);
-        static void SpellDisplacement();
-        static void SpellHaste();
-        static void SpellFindPath();
+        static bool SpellSummonSphere();
+
+        static bool SpellDisplacement();
+        static int getDisplacement();
+
+        static bool SpellHaste();
+        static int getHaste();
+
+        static bool SpellFindPath();
 
     private:
         static Spell** spells;
@@ -77,5 +85,7 @@ class SpellManager
         static SDL_Texture* cellTexture;
         static SDL_Texture* spellsTexture;
         static SDL_Texture* numbersTexture;
+
+        static Json::Value data;
 };
 

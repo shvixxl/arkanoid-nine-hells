@@ -1,5 +1,7 @@
 #include "../include/SpellManager.hpp"
 #include "../include/Window.hpp"
+#include <SDL2/SDL_timer.h>
+#include <json/value.h>
 
 
 Spell** SpellManager::spells = nullptr;
@@ -8,8 +10,20 @@ SDL_Texture* SpellManager::cellTexture = nullptr;
 SDL_Texture* SpellManager::spellsTexture = nullptr;
 SDL_Texture* SpellManager::numbersTexture = nullptr;
 
+Json::Value SpellManager::data;
+
 void SpellManager::Init()
 {
+    std::ifstream file;
+
+    file.open("data/spells.json");
+    if (!file.is_open())
+    {
+        printf("Some data files is missing!");
+    }
+    file >> data;
+    file.close();
+
     cellTexture = Window::LoadTexture("assets/spell_cell.png");
     spellsTexture = Window::LoadTexture("assets/spells.png");
     numbersTexture = Window::LoadTexture("assets/numbers.png");
@@ -86,64 +100,95 @@ void SpellManager::HandleEvents(SDL_Event* event)
 {
     if (event->type == SDL_KEYDOWN && event->key.repeat == 0)
     {
-        switch (event->key.keysym.sym)
+        if (event->key.keysym.sym == SDLK_SPACE ||
+            event->key.keysym.sym == SDLK_1)
         {
-            case SDLK_SPACE:
-                spells[summon_sphere]->TogglePressed();
-                break;
-            case SDLK_1:
-                spells[summon_sphere]->TogglePressed();
-                break;
-            case SDLK_2:
-                spells[displacement]->TogglePressed();
-                break;
-            case SDLK_3:
-                spells[haste]->TogglePressed();
-                break;
-            case SDLK_4:
-                spells[find_path]->TogglePressed();
-                break;
-            default:
-                break;
+            spells[summon_sphere]->TogglePressed();
+        }
+        else if (event->key.keysym.sym == SDLK_2)
+        {
+            spells[displacement]->TogglePressed();
+        }
+        else if (event->key.keysym.sym == SDLK_3)
+        {
+            spells[haste]->TogglePressed();
+        }
+        else if (event->key.keysym.sym == SDLK_4)
+        {
+            spells[find_path]->TogglePressed();
         }
     }
 
     if (event->type == SDL_KEYUP && event->key.repeat == 0)
     {
-        switch (event->key.keysym.sym)
+        if (event->key.keysym.sym == SDLK_SPACE ||
+            event->key.keysym.sym == SDLK_1)
         {
-            case SDLK_SPACE:
-                spells[summon_sphere]->TogglePressed();
-                SpellSummonSphere(driftglobe);
-                break;
-            case SDLK_1:
-                spells[summon_sphere]->TogglePressed();
-                SpellSummonSphere(driftglobe);
-                break;
-            case SDLK_2:
-                spells[displacement]->TogglePressed();
-                break;
-            case SDLK_3:
-                spells[haste]->TogglePressed();
-                break;
-            case SDLK_4:
-                spells[find_path]->TogglePressed();
-                break;
-            default:
-                break;
+            if (spells[summon_sphere]->cast(data["driftglobe"]["cooldown"].asInt(),
+                                            data["driftglobe"]["duration"].asInt()))
+            {
+                EntityManager::throwSphere(driftglobe);
+            }
+        }
+        else if (event->key.keysym.sym == SDLK_2)
+        {
+            if (spells[displacement]->cast(data["displacement"]["cooldown"].asInt(),
+                                           data["displacement"]["duration"].asInt()))
+            {
+
+            }
+        }
+        else if (event->key.keysym.sym == SDLK_3)
+        {
+            if (spells[haste]->cast(data["haste"]["cooldown"].asInt(),
+                                    data["haste"]["duration"].asInt()))
+            {
+
+            }
+        }
+        else if (event->key.keysym.sym == SDLK_4)
+        {
+            if (spells[find_path]->cast(data["find_path"]["cooldown"].asInt(),
+                                        data["find_path"]["duration"].asInt()))
+            {
+
+            }
         }
     }
 }
 
 // Spells
-void SpellManager::SpellSummonSphere(Spheres type)
+bool SpellManager::SpellSummonSphere()
 {
-    if (spells[summon_sphere]->ready() && spells[summon_sphere]->getCount() > 0)
-    {
-        EntityManager::throwSphere(type);
-        
-        spells[summon_sphere]->cast(5);
-    }
+    return !spells[summon_sphere]->end();
+}
+
+
+bool SpellManager::SpellDisplacement()
+{
+    return !spells[displacement]->end();
+}
+
+int SpellManager::getDisplacement()
+{
+    return data["displacement"]["width"].asInt();
+}
+
+
+bool SpellManager::SpellHaste()
+{
+    return !spells[haste]->end();
+}
+
+int SpellManager::getHaste()
+{
+    return data["haste"]["boost"].asInt();
+}
+
+
+bool SpellManager::SpellFindPath()
+{
+    return !spells[haste]->end();
 }
 
 
@@ -215,18 +260,36 @@ int Spell::getCount()
 
 void Spell::addCount(int n)
 {
-    count += n;
+    if (count < 99)
+    {
+        count += n;
+    }
 }
 
-void Spell::cast(int s)
+bool Spell::cast(int cooldown, int duration)
 {
+    isPressed = false;
+
+    if (ready() && count > 0)
+    {
         count -= 1;
 
         castTime = SDL_GetTicks();
-        endTime = castTime + s * 1000;
+        readyTime = castTime + cooldown * 1000;
+        endTime = castTime + duration * 1000;
+
+        return true;
+    }
+
+    return false;
 }
 
 bool Spell::ready()
+{
+    return SDL_GetTicks() > readyTime;
+}
+
+bool Spell::end()
 {
     return SDL_GetTicks() > endTime;
 }

@@ -31,7 +31,8 @@ class Ship
 
         void Slow();
 
-        void Power();
+        void Displace();
+        void Haste();
 
         SDL_Rect getRect() { return paddleRect; }
         float getSpeed() { return speed; }
@@ -57,6 +58,16 @@ class Ship
         SDL_Rect textureRect;
         SDL_Rect windowRect;
         SDL_Rect paddleRect;
+
+        // Spell effects
+        bool isDisplaced;
+        bool isHasted;
+
+        Timer* animation_timer;
+        int lastX;
+        int frames;
+        int frame;
+
 };
 
 
@@ -102,8 +113,8 @@ class Sphere
         float speedX;
 
         Timer* animation_timer;
-        int frame;
         int frames;
+        int frame;
 
         SDL_Texture* texture;
 

@@ -13,7 +13,7 @@
 #include <json/json.h>
 #include <json/writer.h>
 
-// SDL libraties
+// SDL libraries
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_render.h>

@@ -1,4 +1,5 @@
 #include "../include/GameManager.hpp"
+#include <SDL2/SDL_events.h>
 
 Scenes GameManager::currentScene;
 Levels GameManager::currentLevel;
@@ -130,6 +131,39 @@ int GameManager::HandleEvents(SDL_Event* event)
             }
         }
     }
+    else if (currentScene == settings_menu)
+    {
+        if (event->type == SDL_KEYDOWN)
+        {
+            // Select previous button
+            if (event->key.keysym.sym == SDLK_UP ||
+                event->key.keysym.sym == SDLK_w)
+            {
+                changeSelectedButton(selectedButton - 1);
+            }
+            // Select next button
+            else if (event->key.keysym.sym == SDLK_DOWN ||
+                     event->key.keysym.sym == SDLK_s)
+            {
+                changeSelectedButton(selectedButton + 1);
+            }
+            // Press selected button
+            else if (event->key.keysym.sym == SDLK_SPACE ||
+                     event->key.keysym.sym == SDLK_RETURN ||
+                     event->key.keysym.sym == SDLK_RIGHT)
+            {
+                switch (selectedButton)
+                {
+                    default:
+                        break;
+                }
+            }
+            else if (event->key.keysym.sym == SDLK_ESCAPE)
+            {
+                    GameManager::LoadScene(main_menu);
+            }
+        }
+    }
     else if (currentScene == quit_game)
     {
         if (event->type == SDL_KEYDOWN)
@@ -222,8 +256,11 @@ void GameManager::Render()
     }
 
     if (currentScene == main_menu ||
+        currentScene == settings_menu ||
         currentScene == quit_game)
     {
+        Window::Blur();
+
         for (int i = 0; i < buttonsCount; ++i)
         {
             buttons[i]->Render();
@@ -310,6 +347,9 @@ void GameManager::LoadScene(Scenes scene)
             SpellManager::Init();
             EntityManager::addShip(skyship);
             SpellManager::addSpell(summon_sphere, 99);
+            SpellManager::addSpell(displacement, 99);
+            SpellManager::addSpell(haste, 99);
+            SpellManager::addSpell(find_path, 99);
             currentLevel = avernus;
         }
     }

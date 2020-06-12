@@ -347,8 +347,9 @@ Power::Power(SDL_Rect* objectRect)
 
     speed = 2;
 
+    animation_timer = new Timer(100);
     frames = 4;
-    frameDelay = 100;
+    frame = rand() % frames;
 
     windowRect.w = textureRect.w;
     windowRect.h = textureRect.h;
@@ -369,7 +370,17 @@ void Power::Update()
 void Power::Render(SDL_Texture* texture)
 {
     // Animation
-    textureRect.x = ((SDL_GetTicks() / frameDelay) % frames) * textureRect.w;
+    if (animation_timer->Ready())
+    {
+        frame += 1;
+        if (frame >= frames)
+        {
+            frame = 0;
+        }
+        textureRect.x = (frame) * textureRect.w;
+
+        animation_timer->Restart();
+    }
 
     Window::Render(texture, &textureRect, &windowRect);
 }

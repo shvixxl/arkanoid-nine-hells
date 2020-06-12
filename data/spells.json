@@ -1,0 +1,43 @@
+{
+    "summon_sphere": {
+        "en": {
+            "name": "Summon Sphere"
+        },
+
+        "cooldown": 3,
+        "duration": 0
+    },
+
+    "displacement": {
+        "en": {
+            "name": "Displacement"
+        },
+
+        "width": 3,
+
+        "cooldown": 10,
+        "duration": 10
+    },
+
+    "haste": {
+        "en": {
+            "name": "Haste"
+        },
+
+        "boost": 3,
+
+        "cooldown": 10,
+        "duration": 10
+    },
+
+    "find_path": {
+        "en": {
+            "name": "Find Path"
+        },
+        
+        "length": 10,
+
+        "cooldown": 10,
+        "duration": 10
+    }
+}

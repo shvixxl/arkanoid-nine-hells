@@ -1,4 +1,5 @@
 #include "../include/Window.hpp"
+#include <SDL2/SDL_blendmode.h>
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
@@ -93,6 +94,13 @@ void Window::RednerClear()
 void Window::RenderPresent()
 {
     SDL_RenderPresent(renderer);
+}
+
+void Window::Blur()
+{
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 100);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_RenderFillRect(renderer, NULL);
 }
 
 int Window::getWidth()
