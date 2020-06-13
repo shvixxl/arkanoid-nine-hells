@@ -188,7 +188,12 @@ int SpellManager::getHaste()
 
 bool SpellManager::SpellFindPath()
 {
-    return !spells[haste]->end();
+    return !spells[find_path]->end();
+}
+
+int SpellManager::getFindPath()
+{
+    return data["find_path"]["length"].asInt();
 }
 
 

@@ -55,7 +55,7 @@ void MapManager::Init(Levels type, int h, int w)
 
     transitionStep = 16;
     currentTransitionStep = 0;
-    transitionTimer = new Timer(50);
+    transitionTimer = new Timer(25);
     
     Generate(2);
     Next();
@@ -235,6 +235,18 @@ void MapManager::TransitionStep()
 
         transitionTimer->Restart();
     }
+}
+
+std::vector<SDL_Rect> MapManager::GetBricksRect()
+{
+    std::vector<SDL_Rect> bricksRect;
+    
+    for (size_t i = 0; i < bricks.size(); ++i)
+    {
+        bricksRect.push_back(bricks.at(i).getRect());
+    }
+
+    return bricksRect;
 }
 
 

@@ -30,6 +30,7 @@ class Window
         static int getRealHeight();
 
         static float getTopPaddingH();
+        static SDL_Renderer* getRenderer() { return renderer; }
 
     private:
         static SDL_Window* window;

@@ -4,6 +4,7 @@
 #include "Timer.hpp"
 #include "EntityManager.hpp"
 #include "SpellManager.hpp"
+#include <vector>
 #endif
 
 enum Levels
@@ -48,6 +49,8 @@ class Background
         void Update();
 
         void TransitionStep();
+
+        SDL_Rect getRect() { return windowRect; }
 
     private:
         int frames;
@@ -99,6 +102,8 @@ class MapManager
         static void Render();
 
         static void TransitionStep();
+
+        static std::vector<SDL_Rect> GetBricksRect();
 
     private:
         static int mapHeight;

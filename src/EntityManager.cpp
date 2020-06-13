@@ -1,6 +1,8 @@
 #include "../include/EntityManager.hpp"
 #include "../include/Window.hpp"
 #include "../include/SpellManager.hpp"
+#include "../include/MapManager.hpp"
+#include <SDL2/SDL_hints.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_shape.h>
@@ -417,6 +419,11 @@ Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
             this->type = driftglobe;
             data = data["driftglobe"];
             break;
+        
+        case annihilation:
+            this->type = annihilation;
+            data = data["annihilation"];
+            break;
 
         default:
             break;
@@ -433,6 +440,9 @@ Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
     frames = 4;
     frame = rand() % 4;
 
+    find_path_delay = new Timer(50);
+    find_path_dots = nullptr;
+
     windowRect.h = textureRect.h;
     windowRect.w = textureRect.w;
     windowRect.x = x - windowRect.w / 2;
@@ -444,7 +454,14 @@ Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
     movement_type = data["movement_type"].asInt();
     max_speed = data["max_speed"].asFloat();
 
-    this->speedY = data["start_speed"].asFloat() + speedY;
+    if (movement_type == 2)
+    {
+        this->speedY = data["start_speed"].asFloat() + speedY;
+    }
+    else
+    {
+        this->speedY = max_speed;
+    }
     this->speedX = speedX;
 }
 
@@ -531,6 +548,30 @@ int Sphere::Update()
 
 void Sphere::Render()
 {
+    if (SpellManager::SpellFindPath())
+    {
+        if (find_path_dots == nullptr)
+        {
+            FindPath();
+        }
+
+        if (find_path_delay->Ready())
+        {
+            FindPath();
+            find_path_delay->Restart();
+        }
+
+        for (int dot = 0; dot < SpellManager::getFindPath(); dot++)
+        {
+            SDL_SetRenderDrawColor(Window::getRenderer(), 255, 255, 255, 255);
+            SDL_RenderDrawPoint(Window::getRenderer(), find_path_dots[dot]->x, find_path_dots[dot]->y);
+        }
+    }
+    else
+    {
+        find_path_dots = nullptr;
+    }
+
     // Animation
     if (animation_timer->Ready())
     {
@@ -549,15 +590,7 @@ void Sphere::Render()
 
 bool Sphere::CheckCollision(SDL_Rect* objectRect)
 {
-    if ((x >= objectRect->x + objectRect->w) ||
-        (x + windowRect.w <= objectRect->x) ||
-        (y >= objectRect->y + objectRect->h) ||
-        (y + windowRect.h <= objectRect->y))
-    {
-        return false;
-    }
-
-    return true;
+    return SDL_HasIntersection(&windowRect, objectRect);
 }
 
 void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeedY)
@@ -625,8 +658,37 @@ void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeed
     speedY += objectSpeedY;
 }
 
-void FindPath()
+void Sphere::FindPath()
 {
+    find_path_dots = new SDL_Rect*[SpellManager::getFindPath()];
 
+    float temp_x = x;
+    float temp_y = y;
+    float temp_speedX = speedX;
+    float temp_speedY = speedY;
+
+    std::vector<SDL_Rect> bricksRect = MapManager::GetBricksRect();
+
+    for (int dot = 0; dot < SpellManager::getFindPath(); dot++)
+    {
+        for (int step = 0; step < 20; step++)
+        {
+            for (size_t i = 0; i < bricksRect.size(); i++)
+            {
+                if (CheckCollision(&bricksRect.at(i)))
+                {
+                    Rebound(&bricksRect.at(i), 0, 0);
+                }
+            }
+            Update();
+        }
+
+        find_path_dots[dot] = new SDL_Rect(windowRect);
+    }
+
+    x = windowRect.x = temp_x;
+    y = windowRect.y = temp_y;
+    speedX = temp_speedX;
+    speedY = temp_speedY;
 }
 

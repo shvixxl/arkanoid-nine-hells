@@ -78,6 +78,7 @@ class SpellManager
         static int getHaste();
 
         static bool SpellFindPath();
+        static int getFindPath();
 
     private:
         static Spell** spells;

@@ -76,7 +76,8 @@ class Ship
 enum Spheres
 {
     driftglobe,
-    SPHERES_COUNT = driftglobe + 1
+    annihilation,
+    SPHERES_COUNT = annihilation + 1
 };
 
 class Sphere
@@ -113,6 +114,9 @@ class Sphere
         Timer* animation_timer;
         int frames;
         int frame;
+
+        Timer* find_path_delay;
+        SDL_Rect** find_path_dots;
 
         SDL_Texture* texture;
 

@@ -1,6 +1,5 @@
 {
-    "driftglobe":
-    {
+    "driftglobe": {
         "en": {
             "name": "Driftglobe"
         },
@@ -13,5 +12,17 @@
         "speed_boost": 0.05,
 
         "max_speed": 3
+    },
+
+    "annihilation": {
+        "en": {
+            "name": "Sphere of Annihilation"
+        },
+
+        "texture": "assets/annihilation.png",
+
+        "movement_type": 1,
+
+        "max_speed": 2
     }
 }
