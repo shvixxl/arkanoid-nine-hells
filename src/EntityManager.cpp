@@ -486,7 +486,7 @@ int Sphere::Update()
     // ---Speed changes---
     if (movement_type == 1)
     {
-
+        speedY = max_speed;
     }
     else if (movement_type == 2)
     {
@@ -595,27 +595,27 @@ bool Sphere::CheckCollision(SDL_Rect* objectRect)
 
 void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeedY)
 {
-    float deltaX = 0;
-    float deltaY = 0;
+    int deltaX = 0;
+    int deltaY = 0;
 
     // deltaX
-    if (x < objectRect->x)
+    if (windowRect.x < objectRect->x)
     {
-        deltaX = objectRect->x - x;
+        deltaX = objectRect->x - windowRect.x;
     }
-    else if (x + windowRect.w > objectRect->x + objectRect->w)
+    else if (windowRect.x + windowRect.w > objectRect->x + objectRect->w)
     {
-        deltaX = (objectRect->x + objectRect->w) - (x + windowRect.w);
+        deltaX = (objectRect->x + objectRect->w) - (windowRect.x + windowRect.w);
     }
 
     // deltaY
-    if (y < objectRect->y)
+    if (windowRect.y < objectRect->y)
     {
-        deltaY = objectRect->y - y;
+        deltaY = objectRect->y - windowRect.y;
     }
-    else if(y + windowRect.h > objectRect->y + objectRect->h)
+    else if(windowRect.y + windowRect.h > objectRect->y + objectRect->h)
     {
-        deltaY = (objectRect->y + objectRect->h) - (y + windowRect.h);
+        deltaY = (objectRect->y + objectRect->h) - (windowRect.y + windowRect.h);
     }
 
     // Rebound
@@ -641,6 +641,10 @@ void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeed
             {
                 speedY = data["start_speed"].asFloat() * -1;
             }
+            else
+            {
+                speedY *= -1;
+            }
         }
         // South
         else if (deltaY < 0 && speedY < 0)
@@ -649,7 +653,10 @@ void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeed
             {
                 speedY = data["start_speed"].asFloat();
             }
-
+            else
+            {
+                speedY *= -1;
+            }
         }
     }
 
