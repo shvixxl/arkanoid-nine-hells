@@ -140,6 +140,7 @@ class EntityManager
         static void SpheresRebound(size_t id, SDL_Rect* objectRect, float objectSpeedX, float objectSpeedY);
 
         static void getNumberSpheres();
+        static bool isSpheres();
 
     private:
         static std::string ship_type;

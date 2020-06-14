@@ -6,6 +6,7 @@
     "skyship":
     {
         "name": "Skyship",
+        "color": [99, 192, 194],
         
         "texture": "assets/skyship.png",
 

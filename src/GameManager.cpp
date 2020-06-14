@@ -1,4 +1,5 @@
 #include "../include/GameManager.hpp"
+#include <SDL2/SDL_keycode.h>
 
 
 Scenes GameManager::currentScene;
@@ -11,6 +12,9 @@ int GameManager::buttonsCount;
 int GameManager::selectedButton;
 
 std::vector<Object> GameManager::objects;
+
+int GameManager::levelsCount;
+int GameManager::selectedLevel;
 
 Ship** GameManager::ships;
 int GameManager::shipsCount;
@@ -37,7 +41,6 @@ bool GameManager::Init()
     file >> menuData;
     file.close();
 
-    // Default scene is Main Menu
     currentScene = SCENES_NULL;
 
     return true;
@@ -51,7 +54,15 @@ void GameManager::Clean()
 
 int GameManager::HandleEvents(SDL_Event* event)
 {
-    if (currentScene == main_menu)
+    if (currentScene == game_over ||
+        currentScene == victory)
+    {
+        if (event->type == SDL_KEYDOWN)
+        {
+            GameManager::LoadScene(scoreboard);
+        }
+    }
+    else if (currentScene == main_menu)
     {
         if (event->type == SDL_KEYDOWN)
         {
@@ -111,6 +122,31 @@ int GameManager::HandleEvents(SDL_Event* event)
                 {
                     GameManager::LoadScene(level);
                 }
+            }
+        }
+    }
+    else if (currentScene == scoreboard)
+    {
+        if (event->type == SDL_KEYDOWN)
+        {
+            // Select previous button
+            if (event->key.keysym.sym == SDLK_UP ||
+                event->key.keysym.sym == SDLK_w)
+            {
+
+            }
+            // Select next button
+            else if (event->key.keysym.sym == SDLK_DOWN ||
+                     event->key.keysym.sym == SDLK_s)
+            {
+
+            }
+            // Press selected button
+            else if (event->key.keysym.sym == SDLK_ESCAPE ||
+                     event->key.keysym.sym == SDLK_LEFT ||
+                     event->key.keysym.sym == SDLK_RETURN)
+            {
+                GameManager::LoadScene(main_menu);
             }
         }
     }
@@ -190,8 +226,17 @@ int GameManager::HandleEvents(SDL_Event* event)
             }
             else if (event->key.keysym.sym == SDLK_RETURN)
             {
-                currentLevel = "avernus";
-                
+                Json::Value data;
+                std::ifstream file("data/levels.json");
+                if (!file.is_open())
+                {
+                    printf("Some data files is missing!");
+                }
+                file >> data;
+                file.close();
+
+                currentLevel = data["levels"][selectedLevel].asString();
+
                 GameManager::clearGame();
 
                 MapManager::Init(currentLevel.c_str());
@@ -200,10 +245,10 @@ int GameManager::HandleEvents(SDL_Event* event)
 
                 EntityManager::addShip();
 
-                SpellManager::addSpell(summon_sphere, 99);
-                SpellManager::addSpell(displacement, 99);
-                SpellManager::addSpell(haste, 99);
-                SpellManager::addSpell(find_path, 99);
+                SpellManager::addSpell(summon_sphere, 5);
+                SpellManager::addSpell(displacement, 5);
+                SpellManager::addSpell(haste, 5);
+                SpellManager::addSpell(find_path, 5);
 
                 GameManager::LoadScene(level);
             }
@@ -277,6 +322,18 @@ void GameManager::Update()
 {
     if (currentScene == level)
     {
+        if (!MapManager::isBricks())
+        {
+            GameManager::LoadScene(victory);
+        }
+        else if (!EntityManager::isSpheres() && !MapManager::isSouls() && !SpellManager::isSummonSphere())
+        {
+            GameManager::LoadScene(game_over);
+        }
+    }
+
+    if (currentScene == level)
+    {
         EntityManager::UpdateSpheres();
 
         EntityManager::UpdateShip();
@@ -300,7 +357,9 @@ void GameManager::Render()
         SpellManager::Render();
     }
 
-    if (currentScene == main_menu ||
+    if (currentScene == game_over ||
+        currentScene == victory ||
+        currentScene == main_menu ||
         currentScene == quit_game)
     {
         Window::Blur();
@@ -322,18 +381,32 @@ void GameManager::Render()
         {
             buttons[i]->Render();
         }
+        
+        objects.at(selectedLevel).Render();
 
         ships[selectedShip]->Render();
-        objects.at(selectedShip).Render();
+        objects.at(levelsCount + selectedShip).Render();
 
         spheres[selectedSphere]->Render();
-        objects.at(shipsCount + selectedSphere).Render();
+        objects.at(levelsCount + shipsCount + selectedSphere).Render();
     }
 }
 
 void GameManager::LoadScene(Scenes scene)
 {
-    if (scene == main_menu)
+    if (scene == game_over)
+    {
+        GameManager::clearMenu();
+
+        objects.push_back(Object(Window::LoadTexture(menuData["game_over"]["logo"].asString().c_str()), -1, -1));
+    }
+    else if (scene == victory)
+    {
+        GameManager::clearMenu();
+
+        objects.push_back(Object(Window::LoadTexture(menuData["victory"]["logo"].asString().c_str()), -1, -1));
+    }
+    else if (scene == main_menu)
     {
         GameManager::clearMenu();
 
@@ -382,6 +455,29 @@ void GameManager::LoadScene(Scenes scene)
         Json::Value data;
         std::ifstream file;
 
+        // Load levels
+        file.open("data/levels.json");
+        if (!file.is_open())
+        {
+            printf("Some data files is missing!");
+        }
+        file >> data;
+        file.close();
+
+        // Load levels
+        levelsCount = data["levels"].size();
+        for (int i = 0; i < levelsCount; i++)
+        {
+            SDL_Color color;
+            color.r = data[data["levels"][i].asString()]["color"][0].asInt();
+            color.g = data[data["levels"][i].asString()]["color"][1].asInt();
+            color.b = data[data["levels"][i].asString()]["color"][2].asInt();
+            color.a = data[data["levels"][i].asString()]["color"][3].asInt();
+
+            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["levels"][i].asString()]["name"].asString().c_str(), 16, color), -1, 8 + 10 + 8));
+        }
+        selectedLevel = 0;
+
         // Load ships
         file.open("data/ships.json");
         if (!file.is_open())
@@ -395,8 +491,14 @@ void GameManager::LoadScene(Scenes scene)
         ships = new Ship*[shipsCount];
         for (int i = 0; i < shipsCount; i++)
         {
+            SDL_Color color;
+            color.r = data[data["ships"][i].asString()]["color"][0].asInt();
+            color.g = data[data["ships"][i].asString()]["color"][1].asInt();
+            color.b = data[data["ships"][i].asString()]["color"][2].asInt();
+            color.a = data[data["ships"][i].asString()]["color"][3].asInt();
+            
             ships[i] = new Ship(data["ships"][i].asString().c_str(), -1, 8 + 80 + 18);
-            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["ships"][i].asString().c_str()]["name"].asString().c_str(), 10, {64, 64, 128, 255}), -1, 8 + 160 - 24));
+            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["ships"][i].asString()]["name"].asString().c_str(), 10, color), -1, 8 + 160 - 24));
         }
         selectedShip = 0;
 
@@ -413,8 +515,14 @@ void GameManager::LoadScene(Scenes scene)
         spheres = new Sphere*[spheresCount];
         for (int i = 0; i < spheresCount; i++)
         {
+            SDL_Color color;
+            color.r = data[data["spheres"][i].asString()]["color"][0].asInt();
+            color.g = data[data["spheres"][i].asString()]["color"][1].asInt();
+            color.b = data[data["spheres"][i].asString()]["color"][2].asInt();
+            color.a = data[data["spheres"][i].asString()]["color"][3].asInt();
+            
             spheres[i] = new Sphere(data["spheres"][i].asString().c_str(), Window::getWidth() / 2, 16 + 160 + 18, 0, 0);
-            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["spheres"][i].asString().c_str()]["name"].asString().c_str(), 10, {64, 128, 64, 255}), -1, 8 + 240 - 24));
+            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["spheres"][i].asString()]["name"].asString().c_str(), 10, color), -1, 8 + 240 - 24));
         }
         selectedSphere = 0;
 
@@ -482,6 +590,8 @@ void GameManager::clearMenu()
 
         delete[] buttons;
         buttons = nullptr;
+
+        buttonsCount = 0;
     }
 
     // Clear objects
@@ -502,6 +612,8 @@ void GameManager::clearMenu()
 
         delete[] ships;
         ships = nullptr;
+
+        shipsCount = 0;
     }
     
     // Clear spheres
@@ -516,6 +628,8 @@ void GameManager::clearMenu()
 
         delete[] spheres;
         spheres = nullptr;
+
+        spheresCount = 0;
     }
 }
 
@@ -631,7 +745,14 @@ Object::Object(SDL_Texture* texture, int x, int y)
     {
         windowRect.x = Window::getWidth() / 2 - windowRect.w / 2;
     }
-    windowRect.y = y;
+    if (y != -1)
+    {
+        windowRect.y = y;
+    }
+    else 
+    {
+        windowRect.y = Window::getHeight() / 2 - windowRect.h / 2;
+    }
 }
 
 Object::~Object()

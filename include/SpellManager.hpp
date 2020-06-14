@@ -70,6 +70,7 @@ class SpellManager
         static void HandleEvents(SDL_Event* event);
 
         static bool SpellSummonSphere();
+        static bool isSummonSphere();
 
         static bool SpellDisplacement();
         static int getDisplacement();

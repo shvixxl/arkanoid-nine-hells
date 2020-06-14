@@ -258,6 +258,16 @@ std::vector<SDL_Rect> MapManager::GetBricksRect()
     return bricksRect;
 }
 
+bool MapManager::isBricks()
+{
+    return !bricks.empty() && current < mapHeight;
+}
+
+bool MapManager::isSouls()
+{
+    return !powers.empty();
+}
+
 
 
 

@@ -96,6 +96,9 @@ class MapManager
 
         static std::vector<SDL_Rect> GetBricksRect();
 
+        static bool isBricks();
+        static bool isSouls();
+
     private:
         static std::string mapType;
 

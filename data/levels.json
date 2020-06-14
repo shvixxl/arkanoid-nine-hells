@@ -5,6 +5,7 @@
 
     "avernus": {
         "name": "Avernus",
+        "color": [102, 18, 0, 255],
 
         "height": 60,
         "width": 12,

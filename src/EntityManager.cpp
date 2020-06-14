@@ -166,6 +166,10 @@ void EntityManager::SpheresRebound(size_t id, SDL_Rect* objectRect, float object
     spheres.at(id).Rebound(objectRect, objectSpeedX, objectSpeedY);
 }
 
+bool EntityManager::isSpheres()
+{
+    return !spheres.empty();
+}
 
 
 

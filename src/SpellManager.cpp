@@ -163,6 +163,11 @@ bool SpellManager::SpellSummonSphere()
     return !spells[summon_sphere]->end();
 }
 
+bool SpellManager::isSummonSphere()
+{
+    return spells[summon_sphere]->getCount() > 0;
+}
+
 
 bool SpellManager::SpellDisplacement()
 {

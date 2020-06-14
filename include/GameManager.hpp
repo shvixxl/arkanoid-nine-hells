@@ -10,6 +10,8 @@
 
 enum Scenes
 {
+    game_over,
+    victory,
     main_menu,
     new_game,
     scoreboard,
@@ -91,8 +93,11 @@ class GameManager
         static int selectedButton;
 
         static std::vector<Object> objects;
-
+        
         // For "New Game" scene
+        static int levelsCount;
+        static int selectedLevel;
+        
         static Ship** ships;
         static int shipsCount;
         static int selectedShip;
