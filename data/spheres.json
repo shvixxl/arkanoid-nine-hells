@@ -1,8 +1,11 @@
 {
+    "spheres": [
+        "driftglobe",
+        "annihilation"
+    ],
+
     "driftglobe": {
-        "en": {
-            "name": "Driftglobe"
-        },
+        "name": "Driftglobe",
 
         "texture": "assets/driftglobe.png",
 
@@ -15,14 +18,12 @@
     },
 
     "annihilation": {
-        "en": {
-            "name": "Sphere of Annihilation"
-        },
+        "name": "Sphere of Annihilation",
 
         "texture": "assets/annihilation.png",
 
         "movement_type": 1,
 
-        "max_speed": 2
+        "max_speed": 3
     }
 }

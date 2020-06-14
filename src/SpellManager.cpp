@@ -127,7 +127,7 @@ void SpellManager::HandleEvents(SDL_Event* event)
             if (spells[summon_sphere]->cast(data["summon_sphere"]["cooldown"].asInt(),
                                             data["summon_sphere"]["duration"].asInt()))
             {
-                EntityManager::throwSphere(driftglobe);
+                EntityManager::throwSphere();
             }
         }
         else if (event->key.keysym.sym == SDLK_2)
@@ -166,7 +166,12 @@ bool SpellManager::SpellSummonSphere()
 
 bool SpellManager::SpellDisplacement()
 {
-    return !spells[displacement]->end();
+    if (spells)
+    {
+        return !spells[displacement]->end();
+    }
+    
+    return false;
 }
 
 int SpellManager::getDisplacement()
@@ -177,7 +182,12 @@ int SpellManager::getDisplacement()
 
 bool SpellManager::SpellHaste()
 {
-    return !spells[haste]->end();
+    if (spells)
+    {
+        return !spells[haste]->end();
+    }
+
+    return false;
 }
 
 int SpellManager::getHaste()
@@ -188,7 +198,12 @@ int SpellManager::getHaste()
 
 bool SpellManager::SpellFindPath()
 {
-    return !spells[find_path]->end();
+    if (spells)
+    {
+        return !spells[find_path]->end();
+    }
+    
+    return false;
 }
 
 int SpellManager::getFindPath()

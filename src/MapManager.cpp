@@ -2,6 +2,7 @@
 #include "../include/Window.hpp"
 #include <SDL2/SDL_timer.h>
 
+std::string MapManager::mapType;
 
 int MapManager::mapHeight;
 int MapManager::mapWidth;
@@ -24,33 +25,41 @@ Background* MapManager::background = nullptr;
 std::vector<Brick> MapManager::bricks;
 std::vector<Power> MapManager::powers;
 
+Json::Value MapManager::data;
 
-void MapManager::Init(Levels type, int h, int w)
+
+void MapManager::Init(const char* type)
 {
-    switch (type)
+    mapType = type;
+
+    std::ifstream file("data/levels.json");
+    if (!file.is_open())
     {
-        case avernus:
-            backgroundTexture = Window::LoadTexture("assets/avernus.png");
-            brickTexture = Window::LoadTexture("assets/avernus_bricks.png");
-            crackTexture = Window::LoadTexture("assets/crack.png");
-            powerTexture = Window::LoadTexture("assets/soul.png");
-            break;
-        default:
-            return;
-            break;
+        printf("Some data files is missing!");
     }
+    file >> data;
+    file.close();
+
+    data = data[type];
+
+    backgroundTexture = Window::LoadTexture(data["background"].asString().c_str());
+    brickTexture = Window::LoadTexture(data["bricks"].asString().c_str());
+
+    crackTexture = Window::LoadTexture("assets/crack.png");
+    powerTexture = Window::LoadTexture("assets/soul.png");
 
     background = new Background();
 
-    mapHeight = h;
-    mapWidth = w;
+    mapHeight = data["height"].asInt();
+    mapWidth = data["width"].asInt();
+
     map = new int*[mapHeight];
     for (int i = 0; i < mapHeight; i++)
     {
         map[i] = new int[mapWidth];
     }
 
-    step = 12;
+    step = data["step"].asInt();
     current = 0;
 
     transitionStep = 16;

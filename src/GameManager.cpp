@@ -1,10 +1,8 @@
 #include "../include/GameManager.hpp"
-#include <SDL2/SDL_events.h>
+
 
 Scenes GameManager::currentScene;
-Levels GameManager::currentLevel;
-
-Json::Value GameManager::config;
+std::string GameManager::currentLevel;
 
 Json::Value GameManager::menuData;
 
@@ -14,22 +12,18 @@ int GameManager::selectedButton;
 
 std::vector<Object> GameManager::objects;
 
+Ship** GameManager::ships;
+int GameManager::shipsCount;
+int GameManager::selectedShip;
+
+Sphere** GameManager::spheres;
+int GameManager::spheresCount;
+int GameManager::selectedSphere;
+
+
 bool GameManager::Init()
 {
     std::ifstream file;
-
-    // Load configuration file
-    file.open("config.json");
-    if (file.is_open())
-    {
-        file >> config;
-    }
-    else
-    {
-        printf("Configuration file could not be found! Loading defaults settings...\n");
-        GameManager::LoadDefaults();
-    }
-    file.close();
 
     // Load data files
     //
@@ -41,12 +35,10 @@ bool GameManager::Init()
         return false;
     }
     file >> menuData;
-    menuData = menuData[config["language"].asString()];
     file.close();
 
     // Default scene is Main Menu
     currentScene = SCENES_NULL;
-    currentLevel = LEVELS_NULL;
 
     return true;
 }
@@ -54,12 +46,7 @@ bool GameManager::Init()
 void GameManager::Clean()
 {
     GameManager::clearMenu();
-
-    std::ofstream file;
-
-    // Save configuration file
-    file.open("config.json");
-    file << config;
+    GameManager::clearGame();
 }
 
 int GameManager::HandleEvents(SDL_Event* event)
@@ -89,13 +76,9 @@ int GameManager::HandleEvents(SDL_Event* event)
                 {
                     // "Continue"
                     case 0:
-                        if (currentLevel != LEVELS_NULL)
+                        if (!currentLevel.empty())
                         {
                             GameManager::LoadScene(level);
-                        }
-                        else if (buttons[selectedButton]->Available())
-                        {
-                            GameManager::LoadSave();
                         }
                         break;
 
@@ -106,7 +89,7 @@ int GameManager::HandleEvents(SDL_Event* event)
 
                     // "Settings"
                     case 2:
-                        GameManager::LoadScene(settings_menu);
+                        GameManager::LoadScene(scoreboard);
                         break;
 
                     // "Exit"
@@ -120,7 +103,7 @@ int GameManager::HandleEvents(SDL_Event* event)
             }
             else if (event->key.keysym.sym == SDLK_ESCAPE)
             {
-                if (currentLevel == LEVELS_NULL)
+                if (currentLevel.empty())
                 {
                     GameManager::LoadScene(quit_game);
                 }
@@ -131,7 +114,7 @@ int GameManager::HandleEvents(SDL_Event* event)
             }
         }
     }
-    else if (currentScene == settings_menu)
+    else if (currentScene == new_game)
     {
         if (event->type == SDL_KEYDOWN)
         {
@@ -147,20 +130,86 @@ int GameManager::HandleEvents(SDL_Event* event)
             {
                 changeSelectedButton(selectedButton + 1);
             }
-            // Press selected button
-            else if (event->key.keysym.sym == SDLK_SPACE ||
-                     event->key.keysym.sym == SDLK_RETURN ||
-                     event->key.keysym.sym == SDLK_RIGHT)
+            // Choose next option
+            else if (event->key.keysym.sym == SDLK_RIGHT ||
+                     event->key.keysym.sym == SDLK_d)
             {
                 switch (selectedButton)
                 {
+                    case 0:
+                        break;
+
+                    case 1:
+                        selectedShip += 1;
+                        if (selectedShip >= shipsCount)
+                        {
+                            selectedShip = 0;
+                        }
+                        break;
+
+                    case 2:
+                        selectedSphere += 1;
+                        if (selectedSphere >= spheresCount)
+                        {
+                            selectedSphere = 0;
+                        }
+                        break;
+
                     default:
                         break;
                 }
             }
+            // Choose previous option
+            else if (event->key.keysym.sym == SDLK_LEFT ||
+                     event->key.keysym.sym == SDLK_a)
+            {
+                switch (selectedButton)
+                {
+                    case 0:
+                        break;
+
+                    case 1:
+                        selectedShip -= 1;
+                        if (selectedShip < 0)
+                        {
+                            selectedShip = shipsCount - 1;
+                        }
+                        break;
+
+                    case 2:
+                        selectedSphere -= 1;
+                        if (selectedSphere < 0)
+                        {
+                            selectedSphere = spheresCount - 1;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else if (event->key.keysym.sym == SDLK_RETURN)
+            {
+                currentLevel = "avernus";
+                
+                GameManager::clearGame();
+
+                MapManager::Init(currentLevel.c_str());
+                EntityManager::Init(ships[selectedShip]->getType().c_str(), spheres[selectedSphere]->getType().c_str());
+                SpellManager::Init();
+
+                EntityManager::addShip();
+
+                SpellManager::addSpell(summon_sphere, 99);
+                SpellManager::addSpell(displacement, 99);
+                SpellManager::addSpell(haste, 99);
+                SpellManager::addSpell(find_path, 99);
+
+                GameManager::LoadScene(level);
+            }
             else if (event->key.keysym.sym == SDLK_ESCAPE)
             {
-                    GameManager::LoadScene(main_menu);
+                GameManager::LoadScene(main_menu);
             }
         }
     }
@@ -226,11 +275,7 @@ int GameManager::HandleEvents(SDL_Event* event)
 
 void GameManager::Update()
 {
-    if (currentScene == new_game)
-    {
-        GameManager::LoadScene(level);
-    }
-    else if (currentScene == level)
+    if (currentScene == level)
     {
         EntityManager::UpdateSpheres();
 
@@ -244,7 +289,7 @@ void GameManager::Update()
 
 void GameManager::Render()
 {
-    if (currentLevel != LEVELS_NULL)
+    if (!currentLevel.empty())
     {
         MapManager::Render();
 
@@ -256,7 +301,6 @@ void GameManager::Render()
     }
 
     if (currentScene == main_menu ||
-        currentScene == settings_menu ||
         currentScene == quit_game)
     {
         Window::Blur();
@@ -270,6 +314,20 @@ void GameManager::Render()
         {
             objects.at(i).Render();
         }
+    }
+    else if (currentScene == new_game)
+    {
+        Window::Blur();
+        for (int i = 0; i < buttonsCount; ++i)
+        {
+            buttons[i]->Render();
+        }
+
+        ships[selectedShip]->Render();
+        objects.at(selectedShip).Render();
+
+        spheres[selectedSphere]->Render();
+        objects.at(shipsCount + selectedSphere).Render();
     }
 }
 
@@ -297,22 +355,68 @@ void GameManager::LoadScene(Scenes scene)
         selectedButton = 0;
         buttons[selectedButton]->toggleSelected();
 
-        // Check whether save file exist or not to deside "Continue" button
-        // availability and select "New Game" button if there is no save file
-        std::ifstream file("save");
-        if (!file.is_open() && currentLevel == LEVELS_NULL)
+        if (currentLevel.empty())
         {
             buttons[0]->toggleAvailable();
             changeSelectedButton(selectedButton + 1);
         }
-        file.close();
     }
     else if (scene == new_game)
     {
+        GameManager::clearMenu();
 
-    }
-    else if (scene == settings_menu)
-    {
+        // Load buttons
+        const Json::Value buttons_array = menuData["new_game"]["buttons"];
+
+        buttonsCount = buttons_array.size();
+
+        buttons = new Button*[buttonsCount];
+        for (int i = 0; i < buttonsCount; ++i)
+        {
+            buttons[i] = new Button(buttons_array[i]["text"].asString().c_str(), -1, 8 + 80 * i);
+        }
+
+        selectedButton = 0;
+        buttons[selectedButton]->toggleSelected();
+      
+        Json::Value data;
+        std::ifstream file;
+
+        // Load ships
+        file.open("data/ships.json");
+        if (!file.is_open())
+        {
+            printf("Some data files is missing!");
+        }
+        file >> data;
+        file.close();
+
+        shipsCount = data["ships"].size();
+        ships = new Ship*[shipsCount];
+        for (int i = 0; i < shipsCount; i++)
+        {
+            ships[i] = new Ship(data["ships"][i].asString().c_str(), -1, 8 + 80 + 18);
+            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["ships"][i].asString().c_str()]["name"].asString().c_str(), 10, {64, 64, 128, 255}), -1, 8 + 160 - 24));
+        }
+        selectedShip = 0;
+
+        // Load spheres
+        file.open("data/spheres.json");
+        if (!file.is_open())
+        {
+            printf("Some data files is missing!");
+        }
+        file >> data;
+        file.close();
+
+        spheresCount = data["spheres"].size();
+        spheres = new Sphere*[spheresCount];
+        for (int i = 0; i < spheresCount; i++)
+        {
+            spheres[i] = new Sphere(data["spheres"][i].asString().c_str(), Window::getWidth() / 2, 16 + 160 + 18, 0, 0);
+            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["spheres"][i].asString().c_str()]["name"].asString().c_str(), 10, {64, 128, 64, 255}), -1, 8 + 240 - 24));
+        }
+        selectedSphere = 0;
 
     }
     else if (scene == quit_game)
@@ -340,36 +444,9 @@ void GameManager::LoadScene(Scenes scene)
     else if (scene == level)
     {
         GameManager::clearMenu();
-        
-        if (currentLevel == LEVELS_NULL)
-        {
-            MapManager::Init(avernus, 60, 12);
-            SpellManager::Init();
-            EntityManager::addShip(skyship);
-            SpellManager::addSpell(summon_sphere, 99);
-            SpellManager::addSpell(displacement, 99);
-            SpellManager::addSpell(haste, 99);
-            SpellManager::addSpell(find_path, 99);
-            currentLevel = avernus;
-        }
     }
 
     currentScene = scene;
-}
-
-void GameManager::LoadDefaults()
-{
-    std::ofstream file("config.json");
-
-    // Default settings
-    config["language"] = "en";
-
-    file << config;
-}
-
-void GameManager::LoadSave()
-{
-
 }
 
 void GameManager::changeSelectedButton(int newButton)
@@ -413,6 +490,40 @@ void GameManager::clearMenu()
         objects.at(i).Clean();
     }
     objects.clear();
+
+    // Clear ships
+    if (ships)
+    {
+        for (int i = 0; i < shipsCount; ++i)
+        {
+            delete ships[i];
+            ships[i] = nullptr;
+        }
+
+        delete[] ships;
+        ships = nullptr;
+    }
+    
+    // Clear spheres
+    if (spheres)
+    {
+        for (int i = 0; i < spheresCount; ++i)
+        {
+            spheres[i]->Clean();
+            delete spheres[i];
+            spheres[i] = nullptr;
+        }
+
+        delete[] spheres;
+        spheres = nullptr;
+    }
+}
+
+void GameManager::clearGame()
+{
+    EntityManager::Clean();
+    MapManager::Clean();
+    SpellManager::Clean();
 }
 
 

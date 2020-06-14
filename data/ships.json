@@ -1,9 +1,11 @@
 {
+    "ships": [
+        "skyship"
+    ],
+
     "skyship":
     {
-        "en": {
-            "name": "Skyship"
-        },
+        "name": "Skyship",
         
         "texture": "assets/skyship.png",
 

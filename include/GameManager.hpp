@@ -6,16 +6,13 @@
 #include "MapManager.hpp"
 #include "SpellManager.hpp"
 #include "Window.hpp"
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_timer.h>
-#include <SDL2/SDL_ttf.h>
 #endif
 
 enum Scenes
 {
     main_menu,
     new_game,
-    settings_menu,
+    scoreboard,
     quit_game,
     level,
     SCENES_COUNT = level + 1,
@@ -77,19 +74,15 @@ class GameManager
         
         static void Continue();
 
-        static void LoadDefaults();
-        static void LoadSave();
-
         static void changeSelectedButton(int newButton);
         static void clearMenu();
-        
+        static void clearGame();
+
         static Uint32 UpdateBackground(Uint32 interval, void*);
 
     private:
         static Scenes currentScene;
-        static Levels currentLevel;
-
-        static Json::Value config;
+        static std::string currentLevel;
 
         static Json::Value menuData;
 
@@ -98,5 +91,15 @@ class GameManager
         static int selectedButton;
 
         static std::vector<Object> objects;
+
+        // For "New Game" scene
+        static Ship** ships;
+        static int shipsCount;
+        static int selectedShip;
+
+        static Sphere** spheres;
+        static int spheresCount;
+        static int selectedSphere;
+
 };
 

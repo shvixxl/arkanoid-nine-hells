@@ -4,15 +4,7 @@
 #include "Timer.hpp"
 #include "EntityManager.hpp"
 #include "SpellManager.hpp"
-#include <vector>
 #endif
-
-enum Levels
-{
-    avernus,
-    LEVELS_COUNT = avernus + 1,
-    LEVELS_NULL
-};
 
 
 class Brick
@@ -37,7 +29,6 @@ class Brick
 
         SDL_Rect windowRect;
 };
-
 
 class Background
 {
@@ -87,7 +78,7 @@ class Power
 class MapManager
 {
     public:
-        static void Init(Levels type, int h, int w);
+        static void Init(const char* type);
 
         static void Clean();
 
@@ -106,6 +97,8 @@ class MapManager
         static std::vector<SDL_Rect> GetBricksRect();
 
     private:
+        static std::string mapType;
+
         static int mapHeight;
         static int mapWidth;
         static int** map;
@@ -125,4 +118,6 @@ class MapManager
         static std::vector<Brick> bricks;
         static std::vector<Power> powers;
         static Background* background;
+
+        static Json::Value data;
 };

@@ -1,35 +1,32 @@
 {
-    "en": {
-        "main_menu": {
-            "logo": "assets/logo.png",
-            "buttons": [
-                {"text": "Continue"},
-                {"text": "New Game"},
-                {"text": "Settings"},
-                {"text": "Exit"}
-            ]
-        },
+    "main_menu": {
+        "logo": "assets/logo.png",
+        "buttons": [
+            {"text": "Continue"},
+            {"text": "New Game"},
+            {"text": "Scoreboard"},
+            {"text": "Exit"}
+        ]
+    },
 
-        "new_game": {
-            "buttons": [
-                {"text": "Choose your skyship:"},
-                {"text": "Choose your magic sphere:"}
-            ]
-        },
+    "new_game": {
+        "buttons": [
+            {"text": "Level:"},
+            {"text": "Ship:"},
+            {"text": "Sphere:"}
+        ]
+    },
 
-        "settings_menu": {
-            "buttons": [
-                {"text": "Language: ", "var1":"en"}
-            ]
-        },
+    "scoreboard": {
+    
+    },
 
-        "confirmation": {
-            "header": "Are you sure?",
-            "buttons": [
-                {"text": "No"},
-                {"text": "Yes"}
-            ]
-        }
+    "confirmation": {
+        "header": "Are you sure?",
+        "buttons": [
+            {"text": "No"},
+            {"text": "Yes"}
+        ]
     }
 }
 

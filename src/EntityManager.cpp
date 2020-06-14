@@ -7,8 +7,19 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_shape.h>
 
+std::string EntityManager::ship_type;
+std::string EntityManager::sphere_type;
+
 std::vector<Sphere> EntityManager::spheres;
 Ship* EntityManager::ship = nullptr;
+
+
+
+void EntityManager::Init(const char* ship, const char* sphere)
+{
+    ship_type = ship;
+    sphere_type = sphere;
+}
 
 void EntityManager::Clean()
 {
@@ -25,9 +36,9 @@ void EntityManager::Clean()
 
 // Functions for ship management
 
-void EntityManager::addShip(Ships type)
+void EntityManager::addShip()
 {
-    ship = new Ship(type);
+    ship = new Ship(ship_type.c_str(), -1, -1);
 }
 
 
@@ -94,23 +105,19 @@ bool EntityManager::ShipCheckCollision(SDL_Rect* objectRect)
 }
 
 
-
-
-
-
 // Functions for spheres management
 
-void EntityManager::throwSphere(Spheres type)
+void EntityManager::throwSphere()
 {
     SDL_Rect shipRect = ship->getRect();
 
     int x = shipRect.x + shipRect.w / 2;
     int y = shipRect.y + shipRect.h + 10;
 
-    EntityManager::addSphere(type, x, y, ship->getSpeed(), 0);
+    EntityManager::addSphere(sphere_type.c_str(), x, y, ship->getSpeed(), 0);
 }
 
-void EntityManager::addSphere(Spheres type, int x, int y, float speedX, float speedY)
+void EntityManager::addSphere(const char* type, int x, int y, float speedX, float speedY)
 {
     spheres.push_back(Sphere(type, x, y, speedX, speedY));
 }
@@ -166,8 +173,10 @@ void EntityManager::SpheresRebound(size_t id, SDL_Rect* objectRect, float object
 
 // Ship class
 
-Ship::Ship(Ships type)
+Ship::Ship(const char* type, int x, int y)
 {
+    this->type = type;
+
     std::ifstream file("data/ships.json");
     if (!file.is_open())
     {
@@ -176,16 +185,7 @@ Ship::Ship(Ships type)
     file >> data;
     file.close();
 
-    switch (type)
-    {
-        case skyship:
-            this->type = skyship;
-            data = data["skyship"];
-            break;
-
-        default:
-            break;
-    }
+    data = data[type];
 
     texture = Window::LoadTexture(data["texture"].asString().c_str());
 
@@ -202,18 +202,32 @@ Ship::Ship(Ships type)
     
     windowRect.h = textureRect.h;
     windowRect.w = textureRect.w;
-    windowRect.x = Window::getWidth() / 2 - windowRect.w / 2;
-    windowRect.y = Window::getTopPaddingH();
+    if (x == -1)
+    {
+        windowRect.x = Window::getWidth() / 2 - windowRect.w / 2;
+    }
+    else 
+    {
+        windowRect.x = x;
+    }
+    if (y == -1)
+    {
+        windowRect.y = Window::getTopPaddingH();
+    }
+    else
+    {
+        windowRect.y = y;
+    }
 
     paddleRect.h = 32;
     paddleRect.w = data["paddle_width"].asInt();
-    paddleRect.x = Window::getWidth() / 2 - paddleRect.w / 2;
+    paddleRect.x = windowRect.x + windowRect.w / 2 - paddleRect.w / 2;
     paddleRect.y = windowRect.y;
 
-    x = paddleRect.x;
+    this->x = paddleRect.x;
     
     animation_timer = new Timer(50);
-    lastX = x;
+    lastX = this->x;
     frames = 1;
     frame = rand() % 1;
 
@@ -403,8 +417,10 @@ void Ship::Haste()
 
 // Sphere class
 
-Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
+Sphere::Sphere(const char* type, int x, int y, float speedX, float speedY)
 {
+    this->type = type;
+
     std::ifstream file("data/spheres.json");
     if (!file.is_open())
     {
@@ -413,21 +429,7 @@ Sphere::Sphere(Spheres type, int x, int y, float speedX, float speedY)
     file >> data;
     file.close();
 
-    switch (type)
-    {
-        case driftglobe:
-            this->type = driftglobe;
-            data = data["driftglobe"];
-            break;
-        
-        case annihilation:
-            this->type = annihilation;
-            data = data["annihilation"];
-            break;
-
-        default:
-            break;
-    }
+    data = data[type];
 
     texture = Window::LoadTexture(data["texture"].asString().c_str());
 
@@ -486,7 +488,7 @@ int Sphere::Update()
     // ---Speed changes---
     if (movement_type == 1)
     {
-        speedY = max_speed;
+
     }
     else if (movement_type == 2)
     {
@@ -564,7 +566,7 @@ void Sphere::Render()
         for (int dot = 0; dot < SpellManager::getFindPath(); dot++)
         {
             SDL_SetRenderDrawColor(Window::getRenderer(), 255, 255, 255, 255);
-            SDL_RenderDrawPoint(Window::getRenderer(), find_path_dots[dot]->x, find_path_dots[dot]->y);
+            SDL_RenderDrawPoint(Window::getRenderer(), find_path_dots[dot]->x + find_path_dots[dot]->w / 2, find_path_dots[dot]->y + find_path_dots[dot]->h / 2);
         }
     }
     else

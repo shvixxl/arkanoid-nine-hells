@@ -1,17 +1,20 @@
 {
+    "spells": [
+        "summon_sphere",
+        "displacement",
+        "haste",
+        "find_path"
+    ],
+
     "summon_sphere": {
-        "en": {
-            "name": "Summon Sphere"
-        },
+        "name": "Summon Sphere",
 
         "cooldown": 0,
         "duration": 0
     },
 
     "displacement": {
-        "en": {
-            "name": "Displacement"
-        },
+        "name": "Displacement",
 
         "width": 3,
 
@@ -20,9 +23,7 @@
     },
 
     "haste": {
-        "en": {
-            "name": "Haste"
-        },
+        "name": "Haste",
 
         "boost": 3,
 
@@ -31,9 +32,7 @@
     },
 
     "find_path": {
-        "en": {
-            "name": "Find Path"
-        },
+        "name": "Find Path",
         
         "length": 10,
 

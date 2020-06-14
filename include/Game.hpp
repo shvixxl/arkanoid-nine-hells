@@ -8,6 +8,7 @@
 #include <cmath>
 #include <fstream>
 #include <string>
+#include <map>
 
 // JSON libraries
 #include <json/json.h>

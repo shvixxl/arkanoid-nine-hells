@@ -5,23 +5,17 @@
 #endif
 
 
-
-enum Ships
-{
-    skyship,
-    SHIPS_COUNT = skyship + 1
-};
-
 enum ShipMovementDirections
 {
     MOVE_LEFT = 1,
     MOVE_RIGHT = 2
 };
 
+
 class Ship
 {
     public:
-        Ship(Ships type);
+        Ship(const char* type, int x, int y);
         ~Ship();
 
         void Update();
@@ -37,9 +31,11 @@ class Ship
         SDL_Rect getRect() { return paddleRect; }
         float getSpeed() { return speed; }
 
+        std::string getType() { return type; }
+
     private:
+        std::string type;
         Json::Value data;
-        Ships type;
 
         // To determine direction (MOVE_LEFT, MOVE_RIGHT)
         int move;
@@ -67,23 +63,13 @@ class Ship
         int lastX;
         int frames;
         int frame;
-
 };
 
-
-
-
-enum Spheres
-{
-    driftglobe,
-    annihilation,
-    SPHERES_COUNT = annihilation + 1
-};
 
 class Sphere
 {
     public:
-        Sphere(Spheres type, int x, int y, float speedX, float speedY);
+        Sphere(const char* type, int x, int y, float speedX, float speedY);
         ~Sphere();
 
         void Clean();
@@ -97,11 +83,13 @@ class Sphere
         void FindPath();
 
         SDL_Rect getRect() { return windowRect; }
+        
+        std::string getType() { return type; }
 
     private:
+        std::string type;
         Json::Value data;
-        Spheres type;
-       
+
         int movement_type;
         float max_speed;
 
@@ -125,15 +113,14 @@ class Sphere
 
 };
 
-
-
 class EntityManager
 {
     public:
+        static void Init(const char* ship, const char* sphere);
         static void Clean();
 
         // Functions for ships
-        static void addShip(Ships type);
+        static void addShip();
 
         static void UpdateShip();
         static void RenderShip();
@@ -143,8 +130,8 @@ class EntityManager
 
 
         // Functions for spheres
-        static void throwSphere(Spheres type);
-        static void addSphere(Spheres type, int x, int y, float speedX, float speedY);
+        static void throwSphere();
+        static void addSphere(const char* type, int x, int y, float speedX, float speedY);
         
         static void UpdateSpheres();
         static void RenderSpheres();
@@ -155,6 +142,9 @@ class EntityManager
         static void getNumberSpheres();
 
     private:
+        static std::string ship_type;
+        static std::string sphere_type;
+
         static std::vector<Sphere> spheres;
         static Ship* ship;
 };

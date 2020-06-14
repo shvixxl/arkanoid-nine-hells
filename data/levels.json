@@ -1,0 +1,16 @@
+{
+    "levels": [
+        "avernus"
+    ],
+
+    "avernus": {
+        "name": "Avernus",
+
+        "height": 60,
+        "width": 12,
+        "step": 12,
+
+        "background": "assets/avernus.png",
+        "bricks": "assets/avernus_bricks.png"
+    }
+}
