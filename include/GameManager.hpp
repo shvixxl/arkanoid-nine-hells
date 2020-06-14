@@ -85,6 +85,7 @@ class GameManager
         static void writeScore();
 
     private:
+        static bool isPlaying;
         static Scenes currentScene;
         static std::string currentLevel;
 

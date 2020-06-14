@@ -1,5 +1,7 @@
 #include "../include/GameManager.hpp"
 
+bool GameManager::isPlaying;
+
 Scenes GameManager::currentScene;
 std::string GameManager::currentLevel;
 
@@ -59,6 +61,7 @@ bool GameManager::Init()
     }
     file.close();
 
+    isPlaying = false;
     currentScene = SCENES_NULL;
 
     return true;
@@ -111,7 +114,7 @@ int GameManager::HandleEvents(SDL_Event* event)
                 {
                     // "Continue"
                     case 0:
-                        if (!currentLevel.empty())
+                        if (isPlaying)
                         {
                             GameManager::LoadScene(level);
                         }
@@ -142,7 +145,7 @@ int GameManager::HandleEvents(SDL_Event* event)
                 {
                     GameManager::LoadScene(quit_game);
                 }
-                else
+                else if (isPlaying)
                 {
                     GameManager::LoadScene(level);
                 }
@@ -260,6 +263,8 @@ int GameManager::HandleEvents(SDL_Event* event)
                 SpellManager::addSpell(find_path, 5);
 
                 GameManager::LoadScene(level);
+
+                isPlaying = true;
             }
             else if (event->key.keysym.sym == SDLK_ESCAPE)
             {
@@ -367,6 +372,7 @@ int GameManager::HandleEvents(SDL_Event* event)
             // Select current name
             else if (event->key.keysym.sym == SDLK_RETURN && username.length() > 0)
             {
+                SDL_StopTextInput();
                 GameManager::writeScore();
                 GameManager::LoadScene(scoreboard);
             }
@@ -401,10 +407,12 @@ void GameManager::Update()
         if (!MapManager::isBricks())
         {
             GameManager::LoadScene(victory);
+            isPlaying = false;
         }
         else if (!EntityManager::isSpheres() && !MapManager::isSouls() && !SpellManager::isSummonSphere())
         {
             GameManager::LoadScene(game_over);
+            isPlaying = false;
         }
     }
 
@@ -436,6 +444,8 @@ void GameManager::Render()
     if (currentScene == game_over ||
         currentScene == victory ||
         currentScene == main_menu ||
+        currentScene == scoreboard ||
+        currentScene == input_name ||
         currentScene == quit_game)
     {
         Window::Blur();
@@ -465,15 +475,6 @@ void GameManager::Render()
 
         spheres[selectedSphere]->Render();
         objects.at(levelsCount + shipsCount + selectedSphere).Render();
-    }
-    else if (currentScene == scoreboard)
-    {
-        Window::Blur();
-
-        for (int i = 0; i < buttonsCount; ++i)
-        {
-            buttons[i]->Render();
-        }
     }
 }
 
@@ -664,7 +665,7 @@ void GameManager::LoadScene(Scenes scene)
         GameManager::clearMenu();
 
         // Load header
-        objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", menuData["confirmation"]["header"].asString().c_str(), 16, {255, 255, 255, 255}), -1, 64));
+        objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", menuData["confirmation"]["header"].asString().c_str(), 16, {250, 250, 250, 255}), -1, 64));
 
         // Load buttons
         const Json::Value buttons_array = menuData["confirmation"]["buttons"];
@@ -685,11 +686,12 @@ void GameManager::LoadScene(Scenes scene)
     {
         GameManager::clearMenu();
 
-        objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", menuData["input_name"]["header"].asString().c_str(), 16, {255, 255, 255, 255}), -1, 64));
+        objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", menuData["input_name"]["header"].asString().c_str(), 16, {250, 250, 250, 255}), -1, 64));
 
         username = "";
-
-        buttons = new Button*[1];
+        
+        buttonsCount = 1;
+        buttons = new Button*[buttonsCount];
         buttons[0] = new Button(username.c_str(), -1, -1);
 
         SDL_StartTextInput();
@@ -840,7 +842,7 @@ Button::Button(const char* text, int x, int y)
     {
         windowRect.y = y;
     }
-    else 
+    else
     {
         windowRect.y = Window::getHeight() / 2 - windowRect.h / 2;
     }
@@ -884,6 +886,10 @@ void Button::changeText(const char* text)
     SDL_Color textureColorAvailable = {150, 150, 150, 255};
     SDL_Color textureColorSelected = {250, 250, 250, 255};
 
+    SDL_DestroyTexture(texture);
+    SDL_DestroyTexture(textureAvailable);
+    SDL_DestroyTexture(textureSelected);
+
     // Load textures for text
     texture = Window::LoadText("font/PixelAzureBonds.ttf", text, 10, textureColor);
     textureAvailable = Window::LoadText("font/PixelAzureBonds.ttf", text, 10, textureColorAvailable);
@@ -892,8 +898,8 @@ void Button::changeText(const char* text)
     // Initialize width and height of the button
     int w, h;
     SDL_QueryTexture(texture, NULL, NULL, &w, &h);
-    
-    windowRect.x = windowRect.w + (windowRect.w - w);
+
+    windowRect.x = windowRect.x + (windowRect.w - w) / 2;
 
     windowRect.w = w;
     windowRect.h = h;

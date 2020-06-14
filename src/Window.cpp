@@ -48,11 +48,17 @@ SDL_Texture* Window::LoadTexture(const char* filename)
 
 SDL_Texture* Window::LoadText(const char* filename, const char* text, int size, SDL_Color color)
 {
+    std::string textTemp = text;
+    if (textTemp.empty())
+    {
+        textTemp = " ";
+    }
+
     TTF_Font* font = TTF_OpenFont(filename, size);
 
     SDL_Surface* surface = nullptr;
 
-    surface  = TTF_RenderText_Solid(font, text, color);
+    surface  = TTF_RenderText_Solid(font, textTemp.c_str(), color);
     if (!surface)
     {
         printf("Text %s could not be loaded! TTF_Error: %s\n", text, TTF_GetError());
