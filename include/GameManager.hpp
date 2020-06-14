@@ -96,7 +96,7 @@ class GameManager
         static int selectedButton;
         
         static std::vector<Object> objects;
-        
+
         // For "New Game" scene
         static int levelsCount;
         static int selectedLevel;

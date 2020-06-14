@@ -11,6 +11,8 @@
         "width": 12,
         "step": 12,
 
+        "score_multiplier": 1,
+
         "background": "assets/avernus.png",
         "bricks": "assets/avernus_bricks.png"
     }

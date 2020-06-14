@@ -642,6 +642,7 @@ void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeed
             if (movement_type == 2)
             {
                 speedY = data["start_speed"].asFloat() * -1;
+                y = objectRect->y - windowRect.h;
             }
             else
             {
@@ -654,6 +655,7 @@ void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeed
             if (movement_type == 2)
             {
                 speedY = data["start_speed"].asFloat();
+                y = objectRect->y + objectRect->h;
             }
             else
             {

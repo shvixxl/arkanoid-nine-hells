@@ -1,4 +1,5 @@
 #include "../include/GameManager.hpp"
+#include <SDL2/SDL_keycode.h>
 
 bool GameManager::isPlaying;
 
@@ -86,7 +87,19 @@ int GameManager::HandleEvents(SDL_Event* event)
     {
         if (event->type == SDL_KEYDOWN)
         {
-            GameManager::LoadScene(input_name);
+            if (event->key.keysym.sym == SDLK_SPACE ||
+                event->key.keysym.sym == SDLK_RETURN ||
+                event->key.keysym.sym == SDLK_ESCAPE)
+            {
+                if (currentScene == victory)
+                {
+                    GameManager::LoadScene(input_name);
+                }
+                else
+                {
+                    GameManager::LoadScene(scoreboard);
+                }
+            }
         }
     }
     else if (currentScene == main_menu)
@@ -513,8 +526,9 @@ void GameManager::LoadScene(Scenes scene)
         // Select by default "Continue" button
         selectedButton = 0;
         buttons[selectedButton]->toggleSelected();
-
-        if (currentLevel.empty())
+        
+        // Or "New Game"
+        if (!isPlaying)
         {
             buttons[0]->toggleAvailable();
             changeSelectedButton(selectedButton + 1);

@@ -1,5 +1,7 @@
 #include "../include/MapManager.hpp"
 #include "../include/Window.hpp"
+#include "../include/GameManager.hpp"
+#include <SDL2/SDL_timer.h>
 
 std::string MapManager::mapType;
 
@@ -25,6 +27,8 @@ std::vector<Brick> MapManager::bricks;
 std::vector<Power> MapManager::powers;
 
 Json::Value MapManager::data;
+
+Uint32 MapManager::startTime;
 
 
 void MapManager::Init(const char* type)
@@ -67,6 +71,8 @@ void MapManager::Init(const char* type)
     
     Generate(2);
     Next();
+
+    startTime = SDL_GetTicks();
 }
 
 void MapManager::Clean()
@@ -177,6 +183,19 @@ void MapManager::UpdateBricks()
 
             if (bricks.at(i).Hit())
             {
+                float score = 100 * data["score_multiplier"].asFloat();
+
+                if ((float) (SDL_GetTicks() - startTime) / 60000 >= 10)
+                {
+                    score *= 0.1;
+                }
+                else
+                {
+                    score *= 1.0 - ((float) (SDL_GetTicks() - startTime) / 60000) * 0.1;
+                }
+
+                GameManager::addScore(score);
+
                 bricks.erase(bricks.begin() + i);
 
                 // Add power after the destruction of the brick

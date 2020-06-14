@@ -123,4 +123,6 @@ class MapManager
         static Background* background;
 
         static Json::Value data;
+
+        static Uint32 startTime;
 };
