@@ -35,6 +35,10 @@
             {"text": "No"},
             {"text": "Yes"}
         ]
+    },
+
+    "input_name": {
+        "header": "Who are you?"
     }
 }
 

@@ -1,9 +1,4 @@
 #include "../include/Window.hpp"
-#include <SDL2/SDL_blendmode.h>
-#include <SDL2/SDL_pixels.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_ttf.h>
 
 SDL_Window* Window::window = nullptr;
 SDL_Renderer* Window::renderer = nullptr;

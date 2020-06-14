@@ -1,7 +1,5 @@
 #include "../include/SpellManager.hpp"
 #include "../include/Window.hpp"
-#include <SDL2/SDL_timer.h>
-#include <json/value.h>
 
 
 Spell** SpellManager::spells = nullptr;

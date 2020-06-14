@@ -16,6 +16,7 @@ enum Scenes
     new_game,
     scoreboard,
     quit_game,
+    input_name,
     level,
     SCENES_COUNT = level + 1,
     SCENES_NULL
@@ -79,8 +80,9 @@ class GameManager
         static void changeSelectedButton(int newButton);
         static void clearMenu();
         static void clearGame();
-
-        static Uint32 UpdateBackground(Uint32 interval, void*);
+        
+        static void addScore(int amount);
+        static void writeScore();
 
     private:
         static Scenes currentScene;
@@ -91,7 +93,7 @@ class GameManager
         static Button** buttons;
         static int buttonsCount;
         static int selectedButton;
-
+        
         static std::vector<Object> objects;
         
         // For "New Game" scene
@@ -105,6 +107,11 @@ class GameManager
         static Sphere** spheres;
         static int spheresCount;
         static int selectedSphere;
-
+        
+        // For "Scoreboard" scene
+        static int firstButton;
+        static std::vector<std::string> scoreboard_data;
+        static std::string username;
+        static int score;
 };
 

@@ -1,6 +1,4 @@
 #include "../include/GameManager.hpp"
-#include <SDL2/SDL_keycode.h>
-
 
 Scenes GameManager::currentScene;
 std::string GameManager::currentLevel;
@@ -24,6 +22,10 @@ Sphere** GameManager::spheres;
 int GameManager::spheresCount;
 int GameManager::selectedSphere;
 
+int GameManager::firstButton;
+std::vector<std::string> GameManager::scoreboard_data;
+std::string GameManager::username;
+int GameManager::score;
 
 bool GameManager::Init()
 {
@@ -41,6 +43,22 @@ bool GameManager::Init()
     file >> menuData;
     file.close();
 
+    // Load scoreboard
+    file.open("scoreboard.txt");
+    if (!file.is_open())
+    {
+        
+    }
+    else
+    {
+        std::string line;
+        while (std::getline(file, line))
+        {
+            scoreboard_data.push_back(line);
+        }
+    }
+    file.close();
+
     currentScene = SCENES_NULL;
 
     return true;
@@ -50,6 +68,12 @@ void GameManager::Clean()
 {
     GameManager::clearMenu();
     GameManager::clearGame();
+
+    std::ofstream file("scoreboard.txt");
+    for (size_t i = 0; i < scoreboard_data.size(); ++i)
+    {
+        file << scoreboard_data.at(i) << std::endl;
+    }
 }
 
 int GameManager::HandleEvents(SDL_Event* event)
@@ -59,7 +83,7 @@ int GameManager::HandleEvents(SDL_Event* event)
     {
         if (event->type == SDL_KEYDOWN)
         {
-            GameManager::LoadScene(scoreboard);
+            GameManager::LoadScene(input_name);
         }
     }
     else if (currentScene == main_menu)
@@ -125,31 +149,6 @@ int GameManager::HandleEvents(SDL_Event* event)
             }
         }
     }
-    else if (currentScene == scoreboard)
-    {
-        if (event->type == SDL_KEYDOWN)
-        {
-            // Select previous button
-            if (event->key.keysym.sym == SDLK_UP ||
-                event->key.keysym.sym == SDLK_w)
-            {
-
-            }
-            // Select next button
-            else if (event->key.keysym.sym == SDLK_DOWN ||
-                     event->key.keysym.sym == SDLK_s)
-            {
-
-            }
-            // Press selected button
-            else if (event->key.keysym.sym == SDLK_ESCAPE ||
-                     event->key.keysym.sym == SDLK_LEFT ||
-                     event->key.keysym.sym == SDLK_RETURN)
-            {
-                GameManager::LoadScene(main_menu);
-            }
-        }
-    }
     else if (currentScene == new_game)
     {
         if (event->type == SDL_KEYDOWN)
@@ -173,6 +172,11 @@ int GameManager::HandleEvents(SDL_Event* event)
                 switch (selectedButton)
                 {
                     case 0:
+                        selectedLevel += 1;
+                        if (selectedLevel >= levelsCount)
+                        {
+                            selectedLevel = 0;
+                        }
                         break;
 
                     case 1:
@@ -202,6 +206,11 @@ int GameManager::HandleEvents(SDL_Event* event)
                 switch (selectedButton)
                 {
                     case 0:
+                        selectedLevel -= 1;
+                        if (selectedLevel < 0)
+                        {
+                            selectedLevel = levelsCount - 1;
+                        }
                         break;
 
                     case 1:
@@ -258,6 +267,50 @@ int GameManager::HandleEvents(SDL_Event* event)
             }
         }
     }
+    else if (currentScene == scoreboard)
+    {
+        if (event->type == SDL_KEYDOWN)
+        {
+            // Select previous button
+            if (event->key.keysym.sym == SDLK_UP ||
+                event->key.keysym.sym == SDLK_w)
+            {
+                selectedButton -= 1;
+                if (selectedButton < 0 && firstButton == 0)
+                {
+                    if ((int) scoreboard_data.size() >= buttonsCount)
+                    {
+                        firstButton = scoreboard_data.size() - buttonsCount - 1;
+                    }
+                    selectedButton = buttonsCount;
+                }
+                GameManager::LoadScene(scoreboard);
+            }
+            // Select next button
+            else if (event->key.keysym.sym == SDLK_DOWN ||
+                     event->key.keysym.sym == SDLK_s)
+            {
+                selectedButton += 1;
+                if (selectedButton >= buttonsCount && firstButton == (int) scoreboard_data.size() - 12)
+                {
+                    firstButton = 0;
+                    selectedButton = 0;
+                }
+                GameManager::LoadScene(scoreboard);
+            }
+            else if (event->key.keysym.sym == SDLK_DELETE)
+            {
+                scoreboard_data.erase(scoreboard_data.begin() + selectedButton + firstButton);
+                GameManager::LoadScene(scoreboard);
+            }
+            else if (event->key.keysym.sym == SDLK_ESCAPE ||
+                     event->key.keysym.sym == SDLK_LEFT ||
+                     event->key.keysym.sym == SDLK_RETURN)
+            {
+                GameManager::LoadScene(main_menu);
+            }
+        }
+    }
     else if (currentScene == quit_game)
     {
         if (event->type == SDL_KEYDOWN)
@@ -299,6 +352,29 @@ int GameManager::HandleEvents(SDL_Event* event)
             {
                 GameManager::LoadScene(main_menu);
             }
+        }
+    }
+    else if (currentScene == input_name)
+    {
+        if (event->type == SDL_KEYDOWN)
+        {
+            // Backspace handle
+            if (event->key.keysym.sym == SDLK_BACKSPACE && username.length() > 0)
+            {
+                username.pop_back();
+                buttons[0]->changeText(username.c_str());
+            }
+            // Select current name
+            else if (event->key.keysym.sym == SDLK_RETURN && username.length() > 0)
+            {
+                GameManager::writeScore();
+                GameManager::LoadScene(scoreboard);
+            }
+        }
+        else if (event->type == SDL_TEXTINPUT && event->text.text[0] != ' ')
+        {
+            username += event->text.text;
+            buttons[0]->changeText(username.c_str());
         }
     }
     else if (currentScene == level)
@@ -389,6 +465,15 @@ void GameManager::Render()
 
         spheres[selectedSphere]->Render();
         objects.at(levelsCount + shipsCount + selectedSphere).Render();
+    }
+    else if (currentScene == scoreboard)
+    {
+        Window::Blur();
+
+        for (int i = 0; i < buttonsCount; ++i)
+        {
+            buttons[i]->Render();
+        }
     }
 }
 
@@ -496,7 +581,7 @@ void GameManager::LoadScene(Scenes scene)
             color.g = data[data["ships"][i].asString()]["color"][1].asInt();
             color.b = data[data["ships"][i].asString()]["color"][2].asInt();
             color.a = data[data["ships"][i].asString()]["color"][3].asInt();
-            
+
             ships[i] = new Ship(data["ships"][i].asString().c_str(), -1, 8 + 80 + 18);
             objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["ships"][i].asString()]["name"].asString().c_str(), 10, color), -1, 8 + 160 - 24));
         }
@@ -525,7 +610,54 @@ void GameManager::LoadScene(Scenes scene)
             objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["spheres"][i].asString()]["name"].asString().c_str(), 10, color), -1, 8 + 240 - 24));
         }
         selectedSphere = 0;
+    }
+    else if (scene == scoreboard)
+    {
+        GameManager::clearMenu();
+        
+        buttonsCount = (int) scoreboard_data.size() < 12 ? scoreboard_data.size() : 12;
+        buttons = new Button*[buttonsCount];
 
+        if (currentScene != scoreboard)
+        {
+            selectedButton = 0;
+            firstButton = 0;
+        }
+        
+        if (firstButton + buttonsCount > (int) scoreboard_data.size())
+        {
+            firstButton = scoreboard_data.size() - buttonsCount;
+            if (firstButton < 0)
+            {
+                firstButton = 0;
+            }
+        }
+        
+        if (selectedButton > buttonsCount - 5)
+        {
+            if (firstButton < (int) scoreboard_data.size() - buttonsCount)
+            {
+                selectedButton -= 1;
+                firstButton += 1;
+            }
+        }
+        else if (selectedButton < 4)
+        {
+            if (firstButton > 0)
+            {
+                firstButton -= 1;
+                selectedButton += 1;
+            }
+        }
+
+        int button = 0;
+        for (size_t i = firstButton; i < scoreboard_data.size() && button < buttonsCount; i++)
+        {
+            buttons[button] = new Button((std::to_string(i + 1) + " - " + scoreboard_data.at(i)).c_str(), -1, 8 + 20 * button);
+            button++;
+        }
+
+        buttons[selectedButton]->toggleSelected();
     }
     else if (scene == quit_game)
     {
@@ -548,6 +680,19 @@ void GameManager::LoadScene(Scenes scene)
         // Select by default "No" button
         selectedButton = 0;
         buttons[selectedButton]->toggleSelected();
+    }
+    else if (scene == input_name)
+    {
+        GameManager::clearMenu();
+
+        objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", menuData["input_name"]["header"].asString().c_str(), 16, {255, 255, 255, 255}), -1, 64));
+
+        username = "";
+
+        buttons = new Button*[1];
+        buttons[0] = new Button(username.c_str(), -1, -1);
+
+        SDL_StartTextInput();
     }
     else if (scene == level)
     {
@@ -615,7 +760,7 @@ void GameManager::clearMenu()
 
         shipsCount = 0;
     }
-    
+
     // Clear spheres
     if (spheres)
     {
@@ -638,6 +783,25 @@ void GameManager::clearGame()
     EntityManager::Clean();
     MapManager::Clean();
     SpellManager::Clean();
+}
+
+void GameManager::addScore(int amount)
+{
+    score += amount;
+}
+
+void GameManager::writeScore()
+{
+    size_t i;
+    for (i = 0; i < scoreboard_data.size(); ++i)
+    {
+        int score_temp = std::stoi(scoreboard_data.at(i).substr(scoreboard_data.at(i).find(' ') + 1));
+        if (score_temp < score)
+        {
+            break;
+        }
+    }
+    scoreboard_data.emplace(scoreboard_data.begin() + i, username + ' ' + std::to_string(score));
 }
 
 
@@ -663,7 +827,7 @@ Button::Button(const char* text, int x, int y)
     windowRect.w = w;
     windowRect.h = h;
 
-    // Set postition of the button to the center of the window if no x provided
+    // Set postition of the button to the center of the window if x and/or y not provided
     if (x != -1)
     {
         windowRect.x = x;
@@ -672,8 +836,14 @@ Button::Button(const char* text, int x, int y)
     {
         windowRect.x = Window::getWidth() / 2 - windowRect.w / 2;
     }
-
-    windowRect.y = y;
+    if (y != -1)
+    {
+        windowRect.y = y;
+    }
+    else 
+    {
+        windowRect.y = Window::getHeight() / 2 - windowRect.h / 2;
+    }
 
     isAvailable = true;
     isSelected = false;
@@ -710,7 +880,26 @@ void Button::Render()
 
 void Button::changeText(const char* text)
 {
-    printf("%s", text);
+    SDL_Color textureColor = {50, 50, 50, 255};
+    SDL_Color textureColorAvailable = {150, 150, 150, 255};
+    SDL_Color textureColorSelected = {250, 250, 250, 255};
+
+    // Load textures for text
+    texture = Window::LoadText("font/PixelAzureBonds.ttf", text, 10, textureColor);
+    textureAvailable = Window::LoadText("font/PixelAzureBonds.ttf", text, 10, textureColorAvailable);
+    textureSelected = Window::LoadText("font/PixelAzureBonds.ttf", text, 10, textureColorSelected);
+
+    // Initialize width and height of the button
+    int w, h;
+    SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+    
+    windowRect.x = windowRect.w + (windowRect.w - w);
+
+    windowRect.w = w;
+    windowRect.h = h;
+
+    isAvailable = true;
+    isSelected = false;
 }
 
 void Button::toggleAvailable()

@@ -2,10 +2,6 @@
 #include "../include/Window.hpp"
 #include "../include/SpellManager.hpp"
 #include "../include/MapManager.hpp"
-#include <SDL2/SDL_hints.h>
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_shape.h>
 
 std::string EntityManager::ship_type;
 std::string EntityManager::sphere_type;

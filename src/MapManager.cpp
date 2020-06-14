@@ -1,6 +1,5 @@
 #include "../include/MapManager.hpp"
 #include "../include/Window.hpp"
-#include <SDL2/SDL_timer.h>
 
 std::string MapManager::mapType;
 
