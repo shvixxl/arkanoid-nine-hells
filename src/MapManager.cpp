@@ -1,7 +1,6 @@
 #include "../include/MapManager.hpp"
 #include "../include/Window.hpp"
 #include "../include/GameManager.hpp"
-#include <SDL2/SDL_timer.h>
 
 std::string MapManager::mapType;
 
@@ -15,7 +14,6 @@ int MapManager::current;
 
 int MapManager::transitionStep;
 int MapManager::currentTransitionStep;
-Timer* MapManager::transitionTimer;
 
 SDL_Texture* MapManager::backgroundTexture = nullptr;
 SDL_Texture* MapManager::brickTexture = nullptr;
@@ -65,10 +63,9 @@ void MapManager::Init(const char* type)
     step = data["step"].asInt();
     current = 0;
 
-    transitionStep = 16;
+    transitionStep = step * 4;
     currentTransitionStep = 0;
-    transitionTimer = new Timer(25);
-    
+
     Generate(2);
     Next();
 
@@ -153,8 +150,7 @@ void MapManager::Update()
     MapManager::TransitionStep();
 
     MapManager::UpdateBackground();
-    MapManager::UpdatePowers();
-    MapManager::UpdateBricks();
+    MapManager::UpdateSouls();
 
     if (bricks.empty())
     {
@@ -173,58 +169,55 @@ void MapManager::UpdateBricks()
     {
         bricks.at(i).Update();
 
-        SDL_Rect brickRect = bricks.at(i).getRect();
-
-        std::vector<size_t> collided_spheres = EntityManager::SpheresCheckCollision(&brickRect);
-
-        for (size_t k = 0; k < collided_spheres.size(); ++k)
+        if (bricks.at(i).getHealth() <= 0)
         {
-            EntityManager::SpheresRebound(collided_spheres.at(k), &brickRect, 0, 0);
+            SDL_Rect brickRect = bricks.at(i).getRect();
 
-            if (bricks.at(i).Hit())
+            float score = 100 * data["score_multiplier"].asFloat();
+
+            if ((float) (SDL_GetTicks() - startTime) / 60000 >= 10)
             {
-                float score = 100 * data["score_multiplier"].asFloat();
-
-                if ((float) (SDL_GetTicks() - startTime) / 60000 >= 10)
-                {
-                    score *= 0.1;
-                }
-                else
-                {
-                    score *= 1.0 - ((float) (SDL_GetTicks() - startTime) / 60000) * 0.1;
-                }
-
-                GameManager::addScore(score);
-
-                bricks.erase(bricks.begin() + i);
-
-                // Add power after the destruction of the brick
-                powers.push_back(Power(&brickRect));
-
-                break;
+                score *= 0.1;
             }
+            else
+            {
+                score *= 1.0 - ((float) (SDL_GetTicks() - startTime) / 60000) * 0.1;
+            }
+
+            GameManager::addScore(score);
+
+            bricks.erase(bricks.begin() + i);
+
+            // Add power after the destruction of the brick
+            powers.push_back(Power(&brickRect));
         }
     }
 }
 
-void MapManager::UpdatePowers()
+void MapManager::HitBricks(size_t brick)
+{
+    bricks.at(brick).Hit();
+}
+
+void MapManager::UpdateSouls()
 {
     for (size_t i = 0; i < powers.size(); ++i)
     {
         powers.at(i).Update();
 
-        SDL_Rect powerRect = powers.at(i).getRect();
-
-        if (EntityManager::ShipCheckCollision(&powerRect))
-        {
-            SpellManager::GenerateSpell();
-            powers.erase(powers.begin() + i);
-        }
-        else if (powerRect.y + powerRect.h < 0)
+        SDL_Rect soulRect = powers.at(i).getRect();
+        
+        if (soulRect.y + soulRect.h < 0)
         {
             powers.erase(powers.begin() + i);
         }
     }
+}
+
+void MapManager::TakeSouls(size_t soul)
+{
+        SpellManager::GenerateSpell();
+        powers.erase(powers.begin() + soul);
 }
 
 void MapManager::Render()
@@ -244,9 +237,12 @@ void MapManager::Render()
 
 void MapManager::TransitionStep()
 {
-    if (currentTransitionStep > 0 && transitionTimer->Ready())
+    if (currentTransitionStep > 0)
     {
-        background->TransitionStep();
+        if (currentTransitionStep % 4 == 0)
+        {
+            background->TransitionStep();
+        }
 
         for (size_t i = 0; i < bricks.size(); ++i)
         {
@@ -259,21 +255,31 @@ void MapManager::TransitionStep()
         }
 
         currentTransitionStep -= 1;
-
-        transitionTimer->Restart();
     }
 }
 
 std::vector<SDL_Rect> MapManager::GetBricksRect()
 {
     std::vector<SDL_Rect> bricksRect;
-    
+
     for (size_t i = 0; i < bricks.size(); ++i)
     {
         bricksRect.push_back(bricks.at(i).getRect());
     }
 
     return bricksRect;
+}
+
+std::vector<SDL_Rect> MapManager::GetSoulsRect()
+{
+    std::vector<SDL_Rect> soulsRect;
+
+    for (size_t i = 0; i < powers.size(); ++i)
+    {
+        soulsRect.push_back(powers.at(i).getRect());
+    }
+
+    return soulsRect;
 }
 
 bool MapManager::isBricks()
@@ -285,10 +291,6 @@ bool MapManager::isSouls()
 {
     return !powers.empty();
 }
-
-
-
-
 
 
 Brick::Brick(int x, int y)
@@ -336,7 +338,7 @@ void Brick::Update()
 
 void Brick::TranstionStep()
 {
-    windowRect.y -= 6;
+    windowRect.y -= 2;
 }
 
 void Brick::Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture)
@@ -344,10 +346,6 @@ void Brick::Render(SDL_Texture* brickTexture, SDL_Texture* crackTexture)
     Window::Render(brickTexture, &brickRect, &windowRect);
     Window::Render(crackTexture, &crackRect, &windowRect);
 }
-
-
-
-
 
 
 Background::Background()
@@ -418,7 +416,7 @@ Power::~Power()
 
 void Power::Update()
 {
-    windowRect.y -= speed;
+    windowRect.y -= 2;
 }
 
 void Power::Render(SDL_Texture* texture)

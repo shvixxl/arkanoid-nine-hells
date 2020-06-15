@@ -17,7 +17,6 @@ enum Spells
     SPELLS_COUNT = find_path+1
 };
 
-
 class Spell
 {
     public:
@@ -54,7 +53,6 @@ class Spell
         SDL_Rect firstNumberWindowRect;
         SDL_Rect secondNumberWindowRect;
 };
-
 
 class SpellManager
 {

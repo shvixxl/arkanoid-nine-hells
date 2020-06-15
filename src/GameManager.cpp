@@ -1,7 +1,7 @@
 #include "../include/GameManager.hpp"
-#include <SDL2/SDL_keycode.h>
 
 bool GameManager::isPlaying;
+Timer* GameManager::move_timer;
 
 Scenes GameManager::currentScene;
 std::string GameManager::currentLevel;
@@ -61,6 +61,8 @@ bool GameManager::Init()
         }
     }
     file.close();
+
+    move_timer = new Timer(10);
 
     isPlaying = false;
     currentScene = SCENES_NULL;
@@ -309,7 +311,7 @@ int GameManager::HandleEvents(SDL_Event* event)
                      event->key.keysym.sym == SDLK_s)
             {
                 selectedButton += 1;
-                if (selectedButton >= buttonsCount && firstButton == (int) scoreboard_data.size() - 12)
+                if (selectedButton >= buttonsCount && firstButton == (int) scoreboard_data.size() - buttonsCount)
                 {
                     firstButton = 0;
                     selectedButton = 0;
@@ -431,13 +433,21 @@ void GameManager::Update()
 
     if (currentScene == level)
     {
-        EntityManager::UpdateSpheres();
+        if (move_timer->Ready())
+        {
+            EntityManager::UpdateSpheres();
 
-        EntityManager::UpdateShip();
+            EntityManager::UpdateShip();
 
-        MapManager::Update();
+            MapManager::Update();
 
-        SpellManager::Update();
+            SpellManager::Update();
+        }
+    }
+
+    if (move_timer->Ready())
+    {
+        move_timer->Restart();
     }
 }
 
@@ -481,13 +491,15 @@ void GameManager::Render()
             buttons[i]->Render();
         }
         
-        objects.at(selectedLevel).Render();
+        objects.at(0).Render();
+
+        objects.at(1 + selectedLevel).Render();
 
         ships[selectedShip]->Render();
-        objects.at(levelsCount + selectedShip).Render();
+        objects.at(1 + levelsCount + selectedShip).Render();
 
         spheres[selectedSphere]->Render();
-        objects.at(levelsCount + shipsCount + selectedSphere).Render();
+        objects.at(1 + levelsCount + shipsCount + selectedSphere).Render();
     }
 }
 
@@ -538,20 +550,21 @@ void GameManager::LoadScene(Scenes scene)
     {
         GameManager::clearMenu();
 
+        objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", menuData["new_game"]["header"].asString().c_str(), 16, {250, 250, 250, 255}), -1, 8));
+
         // Load buttons
         const Json::Value buttons_array = menuData["new_game"]["buttons"];
 
         buttonsCount = buttons_array.size();
 
         buttons = new Button*[buttonsCount];
-        for (int i = 0; i < buttonsCount; ++i)
-        {
-            buttons[i] = new Button(buttons_array[i]["text"].asString().c_str(), -1, 8 + 80 * i);
-        }
+        buttons[0] = new Button(buttons_array[0]["text"].asString().c_str(), -1, 48);
+        buttons[1] = new Button(buttons_array[1]["text"].asString().c_str(), -1, 100);
+        buttons[2] = new Button(buttons_array[2]["text"].asString().c_str(), -1, 188);
 
         selectedButton = 0;
         buttons[selectedButton]->toggleSelected();
-      
+
         Json::Value data;
         std::ifstream file;
 
@@ -574,7 +587,7 @@ void GameManager::LoadScene(Scenes scene)
             color.b = data[data["levels"][i].asString()]["color"][2].asInt();
             color.a = data[data["levels"][i].asString()]["color"][3].asInt();
 
-            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["levels"][i].asString()]["name"].asString().c_str(), 16, color), -1, 8 + 10 + 8));
+            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["levels"][i].asString()]["name"].asString().c_str(), 16, color), -1, 66));
         }
         selectedLevel = 0;
 
@@ -597,8 +610,8 @@ void GameManager::LoadScene(Scenes scene)
             color.b = data[data["ships"][i].asString()]["color"][2].asInt();
             color.a = data[data["ships"][i].asString()]["color"][3].asInt();
 
-            ships[i] = new Ship(data["ships"][i].asString().c_str(), -1, 8 + 80 + 18);
-            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["ships"][i].asString()]["name"].asString().c_str(), 10, color), -1, 8 + 160 - 24));
+            ships[i] = new Ship(data["ships"][i].asString().c_str(), -1, 120);
+            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["ships"][i].asString()]["name"].asString().c_str(), 10, color), -1, 160));
         }
         selectedShip = 0;
 
@@ -621,16 +634,18 @@ void GameManager::LoadScene(Scenes scene)
             color.b = data[data["spheres"][i].asString()]["color"][2].asInt();
             color.a = data[data["spheres"][i].asString()]["color"][3].asInt();
             
-            spheres[i] = new Sphere(data["spheres"][i].asString().c_str(), Window::getWidth() / 2, 16 + 160 + 18, 0, 0);
-            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["spheres"][i].asString()]["name"].asString().c_str(), 10, color), -1, 8 + 240 - 24));
+            spheres[i] = new Sphere(data["spheres"][i].asString().c_str(), Window::getWidth() / 2, 214, 0, 0);
+            objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", data[data["spheres"][i].asString()]["name"].asString().c_str(), 10, color), -1, 226));
         }
         selectedSphere = 0;
     }
     else if (scene == scoreboard)
     {
         GameManager::clearMenu();
-        
-        buttonsCount = (int) scoreboard_data.size() < 12 ? scoreboard_data.size() : 12;
+       
+        objects.push_back(Object(Window::LoadText("font/PixelAzureBonds.ttf", menuData["scoreboard"]["header"].asString().c_str(), 16, {181, 130, 16, 255}), -1, 8));
+
+        buttonsCount = (int) scoreboard_data.size() < 11 ? scoreboard_data.size() : 11;
         buttons = new Button*[buttonsCount];
 
         if (currentScene != scoreboard)
@@ -648,7 +663,7 @@ void GameManager::LoadScene(Scenes scene)
             }
         }
         
-        if (selectedButton > buttonsCount - 5)
+        if (selectedButton > buttonsCount - 3)
         {
             if (firstButton < (int) scoreboard_data.size() - buttonsCount)
             {
@@ -656,7 +671,7 @@ void GameManager::LoadScene(Scenes scene)
                 firstButton += 1;
             }
         }
-        else if (selectedButton < 4)
+        else if (selectedButton < 2)
         {
             if (firstButton > 0)
             {
@@ -668,7 +683,7 @@ void GameManager::LoadScene(Scenes scene)
         int button = 0;
         for (size_t i = firstButton; i < scoreboard_data.size() && button < buttonsCount; i++)
         {
-            buttons[button] = new Button((std::to_string(i + 1) + " - " + scoreboard_data.at(i)).c_str(), -1, 8 + 20 * button);
+            buttons[button] = new Button((std::to_string(i + 1) + " - " + scoreboard_data.at(i)).c_str(), -1, 36 + 20 * button);
             button++;
         }
 

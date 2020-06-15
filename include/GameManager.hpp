@@ -86,6 +86,8 @@ class GameManager
 
     private:
         static bool isPlaying;
+        static Timer* move_timer;
+
         static Scenes currentScene;
         static std::string currentLevel;
 

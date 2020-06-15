@@ -2,6 +2,7 @@
 #include "../include/Window.hpp"
 #include "../include/SpellManager.hpp"
 #include "../include/MapManager.hpp"
+#include <SDL2/SDL_rect.h>
 
 std::string EntityManager::ship_type;
 std::string EntityManager::sphere_type;
@@ -98,6 +99,16 @@ bool EntityManager::ShipCheckCollision(SDL_Rect* objectRect)
     SDL_Rect shipRect = ship->getRect();
 
     return SDL_HasIntersection(objectRect, &shipRect);
+}
+
+SDL_Rect EntityManager::getShipRect()
+{
+    return ship->getRect();
+}
+
+float EntityManager::getShipSpeed()
+{
+    return ship->getSpeed();
 }
 
 
@@ -242,6 +253,18 @@ Ship::~Ship()
 
 void Ship::Update()
 {
+    // Check Collisions with Objects
+    // Souls
+    std::vector<SDL_Rect> soulsRect = MapManager::GetSoulsRect();
+    for (size_t i = 0; i < soulsRect.size(); ++i)
+    {
+        if (SDL_HasIntersection(&soulsRect.at(i), &windowRect))
+        {
+            MapManager::TakeSouls(i);
+            soulsRect = MapManager::GetSoulsRect();
+        }
+    }
+
     Displace();
     Haste();
 
@@ -465,6 +488,8 @@ Sphere::Sphere(const char* type, int x, int y, float speedX, float speedY)
         this->speedY = max_speed;
     }
     this->speedX = speedX;
+
+    find_path_iteration = false;
 }
 
 Sphere::~Sphere()
@@ -479,6 +504,29 @@ void Sphere::Clean()
 
 int Sphere::Update()
 {
+    // Check Collisions with Objects
+    // Bricks
+    std::vector<SDL_Rect> bricksRect = MapManager::GetBricksRect();
+    for (size_t i = 0; i < bricksRect.size(); ++i)
+    {
+        if (CheckCollision(&bricksRect.at(i)))
+        {
+            if (!find_path_iteration)
+            {
+                MapManager::HitBricks(i);
+            }
+            Rebound(&bricksRect.at(i), 0, 0);
+        }
+    }
+
+    // Ship
+    SDL_Rect shipRect = EntityManager::getShipRect();
+    float shipSpeed = EntityManager::getShipSpeed();
+    if (CheckCollision(&shipRect))
+    {
+        Rebound(&shipRect, shipSpeed, 0);
+    }
+
     // ----MOVEMENT----
     // Types:
     //
@@ -539,6 +587,11 @@ int Sphere::Update()
         speedX = -max_speed;
     }
 
+    if (MapManager::isTransition())
+    {
+        y -= 2;
+    }
+
     // ---Change position---
     x += speedX;
     y += speedY;
@@ -565,7 +618,7 @@ void Sphere::Render()
 
         for (int dot = 0; dot < SpellManager::getFindPath(); dot++)
         {
-            SDL_SetRenderDrawColor(Window::getRenderer(), 255, 255, 255, 255);
+            SDL_SetRenderDrawColor(Window::getRenderer(), 250, 250, 250, 255);
             SDL_RenderDrawPoint(Window::getRenderer(), find_path_dots[dot]->x + find_path_dots[dot]->w / 2, find_path_dots[dot]->y + find_path_dots[dot]->h / 2);
         }
     }
@@ -671,6 +724,8 @@ void Sphere::Rebound(SDL_Rect* objectRect, float objectSpeedX, float objectSpeed
 
 void Sphere::FindPath()
 {
+    find_path_iteration = true;
+
     find_path_dots = new SDL_Rect*[SpellManager::getFindPath()];
 
     float temp_x = x;
@@ -678,22 +733,12 @@ void Sphere::FindPath()
     float temp_speedX = speedX;
     float temp_speedY = speedY;
 
-    std::vector<SDL_Rect> bricksRect = MapManager::GetBricksRect();
-
     for (int dot = 0; dot < SpellManager::getFindPath(); dot++)
     {
-        for (int step = 0; step < 20; step++)
+        for (int step = 0; step < 5; step++)
         {
-            for (size_t i = 0; i < bricksRect.size(); i++)
-            {
-                if (CheckCollision(&bricksRect.at(i)))
-                {
-                    Rebound(&bricksRect.at(i), 0, 0);
-                }
-            }
             Update();
         }
-
         find_path_dots[dot] = new SDL_Rect(windowRect);
     }
 
@@ -701,5 +746,7 @@ void Sphere::FindPath()
     y = windowRect.y = temp_y;
     speedX = temp_speedX;
     speedY = temp_speedY;
+
+    find_path_iteration = false;
 }
 

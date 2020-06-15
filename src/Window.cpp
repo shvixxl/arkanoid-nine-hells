@@ -12,7 +12,7 @@ bool Window::Init(const char* title, int x, int y, int w, int h, int windowFlags
         return false;
     }
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
     if (renderer == NULL)
     {
         printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -136,3 +136,4 @@ float Window::getTopPaddingH()
 {
     return 40;
 }
+

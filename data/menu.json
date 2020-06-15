@@ -18,15 +18,16 @@
     },
 
     "new_game": {
+        "header": "New game",
         "buttons": [
-            {"text": "Level:"},
-            {"text": "Ship:"},
-            {"text": "Sphere:"}
+            {"text": "<< Level >>"},
+            {"text": "<< Ship >>"},
+            {"text": "<< Sphere >>"}
         ]
     },
 
     "scoreboard": {
-
+        "header": "Scoreboard"
     },
 
     "confirmation": {

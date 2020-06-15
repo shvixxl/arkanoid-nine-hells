@@ -1,7 +1,6 @@
 #include "../include/SpellManager.hpp"
 #include "../include/Window.hpp"
 
-
 Spell** SpellManager::spells = nullptr;
 
 SDL_Texture* SpellManager::cellTexture = nullptr;
@@ -166,7 +165,6 @@ bool SpellManager::isSummonSphere()
     return spells[summon_sphere]->getCount() > 0;
 }
 
-
 bool SpellManager::SpellDisplacement()
 {
     if (spells)
@@ -181,7 +179,6 @@ int SpellManager::getDisplacement()
 {
     return data["displacement"]["width"].asInt();
 }
-
 
 bool SpellManager::SpellHaste()
 {
@@ -198,7 +195,6 @@ int SpellManager::getHaste()
     return data["haste"]["boost"].asInt();
 }
 
-
 bool SpellManager::SpellFindPath()
 {
     if (spells)
@@ -213,10 +209,6 @@ int SpellManager::getFindPath()
 {
     return data["find_path"]["length"].asInt();
 }
-
-
-
-
 
 
 Spell::Spell(int spell)

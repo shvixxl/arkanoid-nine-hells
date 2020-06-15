@@ -6,7 +6,6 @@
 #include "SpellManager.hpp"
 #endif
 
-
 class Brick
 {
     public:
@@ -21,6 +20,8 @@ class Brick
         void TranstionStep();
 
         SDL_Rect getRect() { return windowRect; }
+        int getHealth() { return health; };
+
     private:
         int health;
         
@@ -87,14 +88,19 @@ class MapManager
 
         static void Update();
         static void UpdateBackground();
+        static void UpdateSouls();
         static void UpdateBricks();
-        static void UpdatePowers();
+        
+        static void HitBricks(size_t brick);
+        static void TakeSouls(size_t soul);
 
         static void Render();
 
+        static bool isTransition() { return currentTransitionStep > 0; }
         static void TransitionStep();
 
         static std::vector<SDL_Rect> GetBricksRect();
+        static std::vector<SDL_Rect> GetSoulsRect();
 
         static bool isBricks();
         static bool isSouls();
@@ -111,7 +117,6 @@ class MapManager
 
         static int transitionStep;
         static int currentTransitionStep;
-        static Timer* transitionTimer;
 
         static SDL_Texture* brickTexture;
         static SDL_Texture* crackTexture;

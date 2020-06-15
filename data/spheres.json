@@ -20,7 +20,7 @@
 
     "annihilation": {
         "name": "Sphere of Annihilation",
-        "color": [77, 3, 153],
+        "color": [49, 0, 77, 255],
 
         "texture": "assets/annihilation.png",
 

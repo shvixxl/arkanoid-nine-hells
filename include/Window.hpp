@@ -1,7 +1,6 @@
 #ifndef GAME
 #define GAME
 #include "Game.hpp"
-#include <SDL2/SDL_ttf.h>
 #endif
 
 class Window

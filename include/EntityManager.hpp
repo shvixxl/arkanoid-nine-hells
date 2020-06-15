@@ -83,7 +83,7 @@ class Sphere
         void FindPath();
 
         SDL_Rect getRect() { return windowRect; }
-        
+
         std::string getType() { return type; }
 
     private:
@@ -105,6 +105,7 @@ class Sphere
 
         Timer* find_path_delay;
         SDL_Rect** find_path_dots;
+        bool find_path_iteration;
 
         SDL_Texture* texture;
 
@@ -127,6 +128,9 @@ class EntityManager
         
         static void ShipHandleEvents(SDL_Event* event);
         static bool ShipCheckCollision(SDL_Rect* objectRect);
+
+        static SDL_Rect getShipRect();
+        static float getShipSpeed();
 
 
         // Functions for spheres

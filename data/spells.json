@@ -9,7 +9,7 @@
     "summon_sphere": {
         "name": "Summon Sphere",
 
-        "cooldown": 0,
+        "cooldown": 3,
         "duration": 0
     },
 
