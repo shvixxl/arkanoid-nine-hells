@@ -151,6 +151,7 @@ void MapManager::Update()
 
     MapManager::UpdateBackground();
     MapManager::UpdateSouls();
+    MapManager::UpdateBricks();
 
     if (bricks.empty())
     {
@@ -187,6 +188,7 @@ void MapManager::UpdateBricks()
             GameManager::addScore(score);
 
             bricks.erase(bricks.begin() + i);
+            i -= 1;
 
             // Add power after the destruction of the brick
             powers.push_back(Power(&brickRect));
@@ -210,6 +212,7 @@ void MapManager::UpdateSouls()
         if (soulRect.y + soulRect.h < 0)
         {
             powers.erase(powers.begin() + i);
+            i -= 1;
         }
     }
 }

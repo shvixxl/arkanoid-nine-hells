@@ -1,0 +1,13 @@
+{
+    "enemies": [
+        "imp"
+    ],
+
+    "imp": {
+        "attack": "fireball",
+        "delay": 10,
+
+        "texture": "assets/imp.png",
+        "texture-attack": "assets/fireball.png"
+    }
+}

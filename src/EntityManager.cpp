@@ -465,7 +465,7 @@ Sphere::Sphere(const char* type, int x, int y, float speedX, float speedY)
     frames = 4;
     frame = rand() % 4;
 
-    find_path_delay = new Timer(50);
+    find_path_delay = new Timer(25);
     find_path_dots = nullptr;
 
     windowRect.h = textureRect.h;
