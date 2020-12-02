@@ -25,6 +25,8 @@ void EnemyManager::Update()
     {
         enemies.at(i).Update();
     }
+
+
 }
 
 bool EnemyManager::isEnemies()
