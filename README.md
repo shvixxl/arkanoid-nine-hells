@@ -2,7 +2,12 @@
 
 ArkanoidNineHells is a college course project inspired by the game Arkanoid and the Nine Hells of Baator.
 
-## Sreenshots
+- [Screenshots](#screenshots)
+- [Installation](#installation)
+  - [Linux](#linux)
+- [License](#license)
+
+## Screenshots
 
 ![Main menu](https://github.com/ShviXXL/ArkanoidNineHells/blob/master/screenshots/menu.png?raw=true)
 
