@@ -9,17 +9,27 @@ ArkanoidNineHells is a college course project inspired by the game Arkanoid and 
 
 ## Screenshots
 
-![Main menu](https://github.com/ShviXXL/ArkanoidNineHells/blob/master/screenshots/menu.png?raw=true)
+![Main menu](/screenshots/menu.png)
 
-![New game](https://github.com/ShviXXL/ArkanoidNineHells/blob/master/screenshots/new_game.png?raw=true)
+![New game](/screenshots/new_game.png)
 
-![Gameplay 1](https://github.com/ShviXXL/ArkanoidNineHells/blob/master/screenshots/gameplay1.png?raw=true)
+![Gameplay 1](/screenshots/gameplay1.png)
 
-![Gameplay 2](https://github.com/ShviXXL/ArkanoidNineHells/blob/master/screenshots/gameplay2.png?raw=true)
+![Gameplay 2](/screenshots/gameplay2.png)
 
-![Game Over](https://github.com/ShviXXL/ArkanoidNineHells/blob/master/screenshots/gameover.png?raw=true)
+![Game Over](/screenshots/game_over.png)
 
-![Scoreboard](https://github.com/ShviXXL/ArkanoidNineHells/blob/master/screenshots/scoreboard.png?raw=true)
+![Scoreboard 1](/screenshots/scoreboard1.png)
+
+![Gameplay 3](/screenshots/gameplay3.png)
+
+![Well Done](/screenshots/well_done.png)
+
+![Who Are You](/screenshots/who_are_you.png)
+
+![Scoreboard 2](/screenshots/scoreboard2.png)
+
+![Exit](/screenshots/exit.png)
 
 ![Exit](https://github.com/ShviXXL/ArkanoidNineHells/blob/master/screenshots/exit.png?raw=true)
 
