@@ -5,7 +5,7 @@ Game *game = NULL;
 int main()
 {
     game = new Game();
-    game->init("ArkanoidNineHells", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 768, 1024, false);
+    game->init("arkanoid-nine-hells", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 768, 1024, false);
 
     while (game->running())
     {
@@ -18,4 +18,3 @@ int main()
 
     return 0;
 }
-

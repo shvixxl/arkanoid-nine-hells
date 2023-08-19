@@ -1,5 +1,5 @@
 # Define the project name
-project(ArkanoidNineHells)
+project(arkanoid-nine-hells)
 
 # Set the cmake minimum version to 3.17
 cmake_minimum_required(VERSION 3.17)
@@ -48,4 +48,3 @@ target_link_libraries(${PROJECT_NAME} SDL2::TTF)
 
 # Add jsoncpp library
 target_link_libraries(${PROJECT_NAME} jsoncpp)
-

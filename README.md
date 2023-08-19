@@ -1,6 +1,6 @@
-# ArkanoidNineHells
+# Arkanoid - Nine Hells
 
-ArkanoidNineHells is a college course project inspired by the game Arkanoid and the Nine Hells of Baator.
+Arkanoid - Nine Hells is a college course project inspired by the game Arkanoid and the Nine Hells of Baator.
 
 - [Screenshots](#screenshots)
 - [Installation](#installation)
