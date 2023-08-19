@@ -45,7 +45,7 @@ Arkanoid - Nine Hells is a college course project inspired by the game Arkanoid 
 ### Build
 
 ```sh
-git clone https://github.com/shvixxl/arkanoid-nine-hells
+git clone --recurse-submodules https://github.com/shvixxl/arkanoid-nine-hells.git
 cd arkanoid-nine-hells
 
 cmake .
