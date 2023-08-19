@@ -3,8 +3,9 @@
 Arkanoid - Nine Hells is a college course project inspired by the game Arkanoid and the Nine Hells of Baator.
 
 - [Screenshots](#screenshots)
-- [Installation](#installation)
-  - [Linux](#linux)
+- [Usage](#usage)
+  - [Dependencies](#dependencies)
+  - [Build](#build)
 - [License](#license)
 
 ## Screenshots
@@ -31,21 +32,28 @@ Arkanoid - Nine Hells is a college course project inspired by the game Arkanoid 
 
 ![Exit](/screenshots/exit.png)
 
-![Exit](https://github.com/ShviXXL/ArkanoidNineHells/blob/master/screenshots/exit.png?raw=true)
+## Usage
 
-## Installation
+### Dependencies
 
-### Linux
+- `cmake` (`>=3.17`)
+- `sdl2`
+- `sdl2_image`
+- `sdl2_ttf`
+- `jsoncpp`
 
-```
-git clone https://github.com/ShviXXL/ArkanoidNineHells
-cd ArkanoidNineHells
+### Build
+
+```sh
+git clone https://github.com/shvixxl/arkanoid-nine-hells
+cd arkanoid-nine-hells
 
 cmake .
 make
 
-./ArkanoidNineHells
+./arkanoid-nine-hells
 ```
 
 ## License
+
 [MIT](https://choosealicense.com/licenses/mit/)
