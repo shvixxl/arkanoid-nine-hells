@@ -16,8 +16,6 @@ The game was developed using C++ and SDL2 library. All the assets were drawn by 
 
 ---
 
-## Screenshots
-
 ![New game](/screenshots/new_game.png)
 
 ![Gameplay 2](/screenshots/gameplay2.png)
@@ -26,6 +24,7 @@ The game was developed using C++ and SDL2 library. All the assets were drawn by 
 
 ![Main menu](/screenshots/menu.png)
 
+---
 
 ## Usage
 
@@ -39,16 +38,28 @@ The game was developed using C++ and SDL2 library. All the assets were drawn by 
 
 ### Build
 
-```sh
-git clone --recurse-submodules https://github.com/shvixxl/arkanoid-nine-hells.git
-cd arkanoid-nine-hells
+1. Clone (you will need to fetch submodules):
 
-cmake .
-make
+    ```shell
+    git clone --recurse-submodules https://github.com/shvixxl/arkanoid-nine-hells.git
+    ```
+    
+    ```shell
+    cd arkanoid-nine-hells
+    ```
 
-./arkanoid-nine-hells
-```
+2. Compile:
 
-## License
+    ```shell
+    cmake .
+    ```
+    
+    ```shell
+    make
+    ```
 
-[MIT](https://choosealicense.com/licenses/mit/)
+3. Play!
+
+    ```shell
+    ./arkanoid-nine-hells
+    ```
