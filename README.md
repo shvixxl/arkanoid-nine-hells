@@ -28,16 +28,6 @@ The game was developed using C++ and SDL2 library. All the assets were drawn by 
 
 ## Usage
 
-### Dependencies
-
-- `cmake` (`>=3.17`)
-- `sdl2`
-- `sdl2_image`
-- `sdl2_ttf`
-- `jsoncpp`
-
-### Build
-
 1. Clone (you will need to fetch submodules):
 
     ```shell
@@ -48,7 +38,7 @@ The game was developed using C++ and SDL2 library. All the assets were drawn by 
     cd arkanoid-nine-hells
     ```
 
-2. Compile:
+2. Build:
 
     ```shell
     cmake .
@@ -58,8 +48,16 @@ The game was developed using C++ and SDL2 library. All the assets were drawn by 
     make
     ```
 
-3. Play!
+3. Play:
 
     ```shell
     ./arkanoid-nine-hells
     ```
+
+### Dependencies
+
+- `cmake` (`>=3.17`)
+- `sdl2`
+- `sdl2_image`
+- `sdl2_ttf`
+- `jsoncpp`
