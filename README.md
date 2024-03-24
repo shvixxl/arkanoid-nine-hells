@@ -1,36 +1,31 @@
 # Arkanoid - Nine Hells
 
-Arkanoid - Nine Hells is a college course project inspired by the game Arkanoid and the Nine Hells of Baator.
+College Computer Science course project inspired by the game Arkanoid and the Nine Hells of Baator! 🔥
 
-- [Screenshots](#screenshots)
-- [Usage](#usage)
-  - [Dependencies](#dependencies)
-  - [Build](#build)
-- [License](#license)
+## 💡 Idea
+
+I came up with the idea to flip the original Arkanoid and make a game where player is controlling one of the Space Jammers they can choose, and throwing one of the available magic spheres on the towers in the Nine Hells plane trying to destroy them to the bottom. Of course, the idea was inspired by Forgotten Realms.
+
+## 🔮 Magic
+
+I decided to add magic spells to the game some of which could increase the ship's speed, size, duplicate the sphere and even predict their trajectory. The energy for the spells was drawn from souls freed from imprisonment in the towers of hell by destroying the tower's blocks.
+
+## ⚙️ Details
+
+The game was developed using C++ and SDL2 library. All the assets were drawn by me, thankfully I had a bit of experience with pencils and pixel-arts. The game had an easy-to-use extension system, so anyone can add a new magic ship or a sphere.
+
+---
 
 ## Screenshots
 
-![Main menu](/screenshots/menu.png)
-
 ![New game](/screenshots/new_game.png)
-
-![Gameplay 1](/screenshots/gameplay1.png)
 
 ![Gameplay 2](/screenshots/gameplay2.png)
 
-![Game Over](/screenshots/game_over.png)
-
-![Scoreboard 1](/screenshots/scoreboard1.png)
-
 ![Gameplay 3](/screenshots/gameplay3.png)
 
-![Well Done](/screenshots/well_done.png)
+![Main menu](/screenshots/menu.png)
 
-![Who Are You](/screenshots/who_are_you.png)
-
-![Scoreboard 2](/screenshots/scoreboard2.png)
-
-![Exit](/screenshots/exit.png)
 
 ## Usage
 
